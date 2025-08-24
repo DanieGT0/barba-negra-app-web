@@ -370,6 +370,42 @@ async function createTables(client) {
       );
     `);
 
+    // Tabla de detalles de cortes (FALTANTE - AGREGADA)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS detalle_cortes (
+        id SERIAL PRIMARY KEY,
+        factura_id INTEGER,
+        codigo VARCHAR(100),
+        nombre VARCHAR(200),
+        cantidad INTEGER DEFAULT 1,
+        total DECIMAL(10,2),
+        comision DECIMAL(10,2) DEFAULT 0,
+        empleado VARCHAR(100),
+        fecha VARCHAR(20),
+        comanda VARCHAR(20),
+        factura VARCHAR(20),
+        FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE CASCADE
+      );
+    `);
+
+    // Tabla de detalles de productos (FALTANTE - AGREGADA)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS detalle_productos (
+        id SERIAL PRIMARY KEY,
+        factura_id INTEGER,
+        codigo VARCHAR(100),
+        nombre VARCHAR(200),
+        cantidad INTEGER DEFAULT 1,
+        total DECIMAL(10,2),
+        comision DECIMAL(10,2) DEFAULT 0,
+        empleado VARCHAR(100),
+        fecha VARCHAR(20),
+        comanda VARCHAR(20),
+        factura VARCHAR(20),
+        FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE CASCADE
+      );
+    `);
+
     // Tabla de detalles de servicios
     await client.query(`
       CREATE TABLE IF NOT EXISTS detalle_servicios (
