@@ -389,9 +389,51 @@ async function createTables(client) {
 
     console.log('✅ Tablas creadas correctamente');
 
+    // Crear usuario administrador por defecto
+    await createDefaultAdmin(client);
+
   } catch (error) {
     console.error('❌ Error creando tablas:', error);
     throw error;
+  }
+}
+
+// Función para crear usuario administrador por defecto
+async function createDefaultAdmin(client) {
+  try {
+    const bcrypt = require('bcrypt');
+    
+    // Verificar si ya existe el usuario admin
+    const existingUser = await client.query('SELECT * FROM usuarios WHERE usuario = $1', ['admin']);
+    
+    if (existingUser.rows.length === 0) {
+      console.log('🔧 Creando usuario administrador...');
+      
+      // Hash de la contraseña
+      const hash = await bcrypt.hash('admin123', 10);
+      
+      // Módulos de administrador
+      const modulosAdmin = JSON.stringify([
+        "clientes", "empleados", "productos", "compras", "cortes", 
+        "facturas", "usuarios", "gastos", "citas", "planilla", "comisiones"
+      ]);
+      
+      // Insertar usuario administrador
+      await client.query(
+        `INSERT INTO usuarios (usuario, password, rol, modulos) VALUES ($1, $2, $3, $4)`,
+        ['admin', hash, 'Admin', modulosAdmin]
+      );
+      
+      console.log('✅ Usuario administrador creado exitosamente');
+      console.log('   👤 Usuario: admin');
+      console.log('   🔑 Contraseña: admin123');
+      
+    } else {
+      console.log('✅ Usuario administrador ya existe');
+    }
+    
+  } catch (error) {
+    console.error('❌ Error creando usuario administrador:', error);
   }
 }
 
