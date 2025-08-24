@@ -188,7 +188,7 @@ function toggleFormulario() {
 }
 
 async function cargarClientes() {
-  const res = await fetch('http://localhost:3001/api/clientes?limit=9999'); // Obtener todos los clientes
+  const res = await fetch('/api/clientes?limit=9999'); // Obtener todos los clientes
   const response = await res.json();
   
   // Manejar respuesta con paginación
@@ -209,7 +209,7 @@ async function cargarClientes() {
 }
 
 async function cargarEmpleados() {
-  const res = await fetch('http://localhost:3001/api/empleados');
+  const res = await fetch('/api/empleados');
   const empleados = await res.json();
   empleadosList = empleados;
   
@@ -261,7 +261,7 @@ function actualizarSelectsEmpleados() {
 }
 
 async function cargarCortes() {
-  const res = await fetch('http://localhost:3001/api/cortes');
+  const res = await fetch('/api/cortes');
   cortesList = await res.json();
   // Solo agregar corte inicial si no hay elementos ya presentes
   const cortesContainer = document.getElementById('cortesContainer');
@@ -271,7 +271,7 @@ async function cargarCortes() {
 }
 
 async function cargarProductos() {
-  const res = await fetch('http://localhost:3001/productos');
+  const res = await fetch('/productos');
   productosList = await res.json();
   productosList.forEach(p => inventarioActual[p.codigo] = p.existencia);
   // Solo agregar producto inicial si no hay elementos ya presentes
@@ -828,7 +828,7 @@ function obtenerClienteIdActivo() {
 }
 
 async function existeFacturaYComanda(comanda, factura) {
-  const res = await fetch("http://localhost:3001/facturas");
+  const res = await fetch("/facturas");
   const data = await res.json();
   return data.some(f => f.comanda == comanda && f.factura == factura);
 }
@@ -870,7 +870,7 @@ function hayItemsValidos() {
 }
 
 async function actualizarInventarioEnMemoria() {
-  const res = await fetch('http://localhost:3001/productos');
+  const res = await fetch('/productos');
   const productos = await res.json();
   productosList = productos;
   productos.forEach(p => inventarioActual[p.codigo] = p.existencia);
@@ -1083,7 +1083,7 @@ async function guardarFactura(e) {
   };
 
   try {
-    const res = await fetch('http://localhost:3001/facturas', {
+    const res = await fetch('/facturas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1169,7 +1169,7 @@ async function guardarFactura(e) {
 // ===================================================
 
 async function cargarListasFiltro() {
-  const empleados = await (await fetch('http://localhost:3001/api/empleados')).json();
+  const empleados = await (await fetch('/api/empleados')).json();
   const selEmpleado = document.getElementById('filtroEmpleado');
 
   selEmpleado.innerHTML = '<option value="">Todos</option>';
@@ -1304,7 +1304,7 @@ function renderizarTablaFacturas(facturas) {
     const anio = fechaParts[2];
     
     const pdfNombre = anio + '_' + String(f.factura).padStart(4,'0') + '.pdf';
-    const pdfRuta = 'http://localhost:3001/factura/Fac/' + mes + '/' + pdfNombre;
+    const pdfRuta = '/factura/Fac/' + mes + '/' + pdfNombre;
     
     // Construir información del tipo de pago
     let tipoPagoTexto = f.tipo_pago;
@@ -2020,7 +2020,7 @@ async function generarYDescargarFacturaPDF(datosFactura) {
     console.log('📋 Datos preparados para PDF:', datosPDF);
     
     // Enviar solicitud al servidor para generar PDF
-    const response = await fetch('http://localhost:3001/api/generar-factura-pdf', {
+    const response = await fetch('/api/generar-factura-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

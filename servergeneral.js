@@ -2607,7 +2607,7 @@ app.get('/facturas', async (req, res) => {
       params.push(pago); 
     }
 
-    sql += ' ORDER BY substring(fecha, 7, 4) DESC, substring(fecha, 4, 2) DESC, substring(fecha, 1, 2) DESC, CAST(factura AS INTEGER) DESC';
+    sql += ' ORDER BY substring(fecha, 7, 4) DESC, substring(fecha, 4, 2) DESC, substring(fecha, 1, 2) DESC, COALESCE(factura::INTEGER, 0) DESC';
 
     console.log('SQL generado:', sql);
     console.log('Parametros:', params);
@@ -2761,8 +2761,8 @@ app.get('/api/detalle_cortes', async (req, res) => {
       FROM detalle_cortes 
       ORDER BY 
         fecha DESC,
-        CAST(factura AS INTEGER) DESC,
-        CAST(comanda AS INTEGER) DESC
+        COALESCE(factura::INTEGER, 0) DESC,
+        COALESCE(comanda::INTEGER, 0) DESC
     `;
     
     console.log('📊 Ejecutando consulta con ordenamiento: fecha DESC, factura DESC, comanda DESC');
@@ -2810,8 +2810,8 @@ app.get('/api/detalle_productos', async (req, res) => {
     FROM detalle_productos 
     ORDER BY 
       fecha DESC,
-      CAST(factura AS INTEGER) DESC,
-      CAST(comanda AS INTEGER) DESC
+      COALESCE(factura::INTEGER, 0) DESC,
+      COALESCE(comanda::INTEGER, 0) DESC
   `;
   
   console.log('📊 Ejecutando consulta con ordenamiento: fecha DESC, factura DESC, comanda DESC');
