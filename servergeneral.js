@@ -1917,10 +1917,10 @@ app.post('/facturas', async (req, res) => {
     // Iniciar transacción
     await client.query('BEGIN');
 
-    // Insertar factura
+    // Insertar factura (sin empleado_principal por si no existe la columna)
     const insertFacturaQuery = `
       INSERT INTO facturas (
-        fecha, comanda, factura, cliente, empleado_principal,
+        fecha, comanda, factura, cliente, empleado,
         tipo_pago, precio_venta, descuento, total,
         es_pago_mixto, monto_efectivo, monto_tarjeta
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -1948,7 +1948,7 @@ app.post('/facturas', async (req, res) => {
     });
 
     const facturaResult = await client.query(insertFacturaQuery, [
-      fecha, comanda, factura, cliente, empleado_principal,
+      fecha, comanda, factura, cliente, empleado_principal || 'Admin',
       tipo_pago, precioVentaNum, descuentoNum, totalNum,
       es_pago_mixto ? 1 : 0, montoEfectivoNum, montoTarjetaNum
     ]);
@@ -1972,12 +1972,12 @@ app.post('/facturas', async (req, res) => {
           
           await client.query(insertCorteQuery, [
             facturaId,
-            c.codigo,
-            c.nombre,
+            c.codigo || '',
+            c.nombre || '',
             cantidadNum,
             precioNum,
             comisionNum,
-            c.empleado,
+            c.empleado || 'Admin',
             fecha,
             comanda,
             factura
@@ -2003,12 +2003,12 @@ app.post('/facturas', async (req, res) => {
           
           await client.query(insertProductoQuery, [
             facturaId,
-            p.codigo,
-            p.nombre,
+            p.codigo || '',
+            p.nombre || '',
             cantidadNum,
             precioNum,
             comisionNum,
-            p.empleado,
+            p.empleado || 'Admin',
             fecha,
             comanda,
             factura
@@ -2034,9 +2034,28 @@ app.post('/facturas', async (req, res) => {
     console.log(`✅ Factura ${factura} creada exitosamente con ID: ${facturaId}`);
 
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error("Error al guardar factura:", error);
-    res.status(500).json({ mensaje: "Error al guardar factura" });
+    try {
+      await client.query('ROLLBACK');
+    } catch (rollbackError) {
+      console.error('Error en ROLLBACK:', rollbackError);
+    }
+    
+    console.error("❌ Error completo al guardar factura:", {
+      mensaje: error.message,
+      codigo: error.code,
+      detalle: error.detail,
+      columna: error.column,
+      tabla: error.table,
+      constraint: error.constraint,
+      stack: error.stack
+    });
+    
+    res.status(500).json({ 
+      mensaje: "Error al guardar factura",
+      error: error.message,
+      codigo: error.code,
+      detalle: error.detail
+    });
   } finally {
     client.release();
   }
