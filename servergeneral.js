@@ -180,8 +180,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    secure: false, // Cambiado: Render usa HTTPS pero internamente proxy HTTP
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 horas
+    sameSite: 'lax'
   }
 }));
 
@@ -5546,10 +5548,23 @@ app.post('/api/login', async (req, res) => {
 // ➡️ Ruta para obtener sesión actual
 app.get('/api/session', (req, res) => {
   if (req.session.usuario) {
+    let modulos = [];
+    try {
+      // Manejar tanto string JSON como array ya parseado
+      if (typeof req.session.modulos === 'string') {
+        modulos = JSON.parse(req.session.modulos);
+      } else if (Array.isArray(req.session.modulos)) {
+        modulos = req.session.modulos;
+      }
+    } catch (e) {
+      console.error('Error parseando módulos:', e);
+      modulos = [];
+    }
+    
     res.json({
       usuario: req.session.usuario,
       rol: req.session.rol,
-      modulos: req.session.modulos ? JSON.parse(req.session.modulos) : []
+      modulos: modulos
     });
   } else {
     res.status(401).json({ mensaje: "No autorizado" });
