@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boleta de Pago Profesional - Barba Negra</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 24px;
+    }
+
+    /* Optimización para vista web responsiva */
+    @media screen and (max-width: 768px) {
+      body { 
+        padding: 12px; 
+        font-size: 10px;
+      }
+      .boleta-container { 
+        height: auto;
+        min-height: auto;
+        max-width: 100%;
+      }
+      .employee-info { 
+        grid-template-columns: 1fr; 
+        gap: 12px;
+      }
+      .summary-section { 
+        grid-template-columns: 1fr; 
+      }
+      .salary-table th,
+      .salary-table td { 
+        padding: 6px 4px; 
+        font-size: 9px;
+      }
+      .header-content h1 {
+        font-size: 18px;
+      }
+    }
+
+    @media screen {
+      .boleta-container {
+        background: white;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        margin-bottom: 40px;
+      }
+    }
+
+    .boleta-container {
+      width: 100%;
+      max-width: 8.5in;
+      min-height: 6in;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* HEADER PROFESIONAL */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      color: white;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand-info h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      background: linear-gradient(45deg, #ffffff, #e2e8f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-info .subtitle {
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.8;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .period-info {
+      text-align: right;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .period-info .period-label {
+      font-size: 10px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .period-info .period-dates {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .content {
+      flex: 1;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* INFORMACIÓN DEL EMPLEADO */
+    .employee-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .employee-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, #3b82f6, #06b6d4);
+    }
+
+    .employee-section h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .employee-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: #64748b;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 13px;
+    }
+
+    /* TARJETAS DE RESUMEN */
+    .summary-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .summary-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .summary-card.services::before {
+      background: linear-gradient(90deg, #ef4444, #f97316);
+    }
+
+    .summary-card.products::before {
+      background: linear-gradient(90deg, #8b5cf6, #a855f7);
+    }
+
+    .summary-card h3 {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .summary-breakdown {
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .commission-amount {
+      font-size: 14px;
+      font-weight: 600;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid #a7f3d0;
+    }
+
+    /* TABLA DE SALARIOS PREMIUM */
+    .salary-table-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .salary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .salary-table thead {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    .salary-table th {
+      color: white;
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .salary-table th:nth-child(2) { text-align: center; }
+    .salary-table th:nth-child(3) { text-align: right; }
+
+    .salary-table tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: background-color 0.2s ease;
+    }
+
+    .salary-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .salary-table td {
+      padding: 16px 20px;
+      vertical-align: middle;
+    }
+
+    .concept-cell {
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    .quantity-cell {
+      text-align: center;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .amount-cell {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .positive-amount {
+      color: #059669;
+    }
+
+    .negative-amount {
+      color: #dc2626;
+    }
+
+    .total-row {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+      color: white !important;
+    }
+
+    .total-row td {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 20px;
+    }
+
+    .total-row:hover {
+      background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
+    }
+
+    /* FOOTER ELEGANTE */
+    .footer {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-top: 1px solid #e2e8f0;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .generation-info {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .company-info {
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    .signature-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .signature-line {
+      width: 200px;
+      height: 2px;
+      background: linear-gradient(90deg, #e2e8f0, #94a3b8, #e2e8f0);
+      border-radius: 1px;
+    }
+
+    .signature-text {
+      font-size: 9px;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ANIMACIONES Y EFECTOS */
+    @media screen {
+      .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    /* PRINT OPTIMIZATION */
+    @page {
+      size: letter;
+      margin: 0.5in;
+    }
+
+    @media print {
+      body {
+        font-size: 10px;
+        background: white !important;
+        padding: 0 !important;
+      }
+      
+      .boleta-container {
+        height: auto;
+        min-height: auto;
+        border: none;
+        box-shadow: none !important;
+        margin: 0;
+        background: white !important;
+      }
+      
+      .btn-imprimir {
+        display: none !important;
+      }
+
+      .header {
+        padding: 20px;
+      }
+
+      .content {
+        padding: 24px;
+      }
+
+      .summary-card:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .salary-table tbody tr:hover {
+        background: transparent;
+      }
+    }
+
+    /* UTILITY CLASSES */
+    .text-bold { font-weight: 700; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="boleta-container">
+    <!-- HEADER PROFESIONAL -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="../imagenes/logo.jpg" alt="Barba Negra Logo" class="logo" onerror="this.style.display='none'">
+          <div class="brand-info">
+            <h1>BARBA NEGRA</h1>
+            <div class="subtitle">Comprobante de Salario</div>
+          </div>
+        </div>
+        <div class="period-info">
+          <div class="period-label">Período de Pago</div>
+          <div class="period-dates">{{desde}} - {{hasta}}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="content">
+      <!-- INFORMACIÓN DEL EMPLEADO -->
+      <div class="employee-section">
+        <h2>👤 Información del Empleado</h2>
+        <div class="employee-info">
+          <div class="info-item">
+            <span class="info-label">Nombre Completo</span>
+            <span class="info-value">{{nombre}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Cargo</span>
+            <span class="info-value">{{cargo}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Documento de Identidad</span>
+            <span class="info-value">{{dui}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Días Trabajados</span>
+            <span class="info-value">{{dias}} días</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESUMEN DE PRODUCTIVIDAD -->
+      <div class="summary-section">
+        <div class="summary-card services">
+          <h3>✂️ Servicios Realizados</h3>
+          <div class="summary-number">{{cantidad_cortes}}</div>
+          <div class="summary-breakdown">
+            Servicios completados en el período<br>
+            Generando comisiones activas
+          </div>
+          <div class="commission-amount">💰 ${{comision_cortes}}</div>
+        </div>
+        <div class="summary-card products">
+          <h3>🛍️ Productos Vendidos</h3>
+          <div class="summary-number">{{cantidad_productos}}</div>
+          <div class="summary-breakdown">
+            Productos comercializados<br>
+            Con comisiones aplicables
+          </div>
+          <div class="commission-amount">💰 ${{comision_productos}}</div>
+        </div>
+      </div>
+
+      <!-- TABLA DE DESGLOSE SALARIAL -->
+      <div class="salary-table-container">
+        <table class="salary-table">
+          <thead>
+            <tr>
+              <th>Concepto Salarial</th>
+              <th>Cantidad</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="concept-cell">💼 Salario Base Mensual</td>
+              <td class="quantity-cell">30 días base</td>
+              <td class="amount-cell positive-amount">${{salario_base}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">📅 Salario Proporcional</td>
+              <td class="quantity-cell">{{dias}} días trabajados</td>
+              <td class="amount-cell positive-amount">${{salario_proporcional}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">✂️ Comisión por Servicios</td>
+              <td class="quantity-cell">{{cantidad_cortes}} servicios</td>
+              <td class="amount-cell positive-amount">${{comision_cortes}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">🛍️ Comisión por Productos</td>
+              <td class="quantity-cell">{{cantidad_productos}} productos</td>
+              <td class="amount-cell positive-amount">${{comision_productos}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">⏰ Horas Extras</td>
+              <td class="quantity-cell">{{cantidad_horas}} horas</td>
+              <td class="amount-cell positive-amount">${{total_horas_extras}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">📆 Días Dobles</td>
+              <td class="quantity-cell">{{cantidad_dias_dobles}} días</td>
+              <td class="amount-cell positive-amount">${{total_dias_dobles}}</td>
+            </tr>
+            <tr>
+              <td class="concept-cell">⚠️ Descuentos Aplicados</td>
+              <td class="quantity-cell">Varios conceptos</td>
+              <td class="amount-cell negative-amount">-${{total_descuentos}}</td>
+            </tr>
+            <tr class="total-row">
+              <td class="text-bold">💰 TOTAL NETO A PAGAR</td>
+              <td></td>
+              <td class="text-bold text-right">${{total_pago}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOOTER ELEGANTE -->
+    <div class="footer">
+      <div class="footer-info">
+        <div class="generation-info">📄 Documento generado automáticamente</div>
+        <div class="company-info">🏪 Barba Negra - Paseo General Escalón · Tel: 7609-8960</div>
+      </div>
+      <div class="signature-section">
+        <div class="signature-line"></div>
+        <div class="signature-text">Firma del Empleado</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

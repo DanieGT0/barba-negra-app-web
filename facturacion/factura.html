@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factura - Barbershop</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <!-- Estilos adicionales para botones de descarga -->
+  <style>
+    .btn-pdf {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn-pdf:hover {
+      background-color: #c82333;
+    }
+    
+    .btn-pdf:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .btn-pdf i {
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Botón para ir al Centro de Reportes -->
+    <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+
+    <h1><i class="fas fa-cash-register"></i> Registro de Ventas</h1>
+    <button id="toggleForm" class="btn-secondary">Mostrar formulario</button>
+
+    <form id="formFactura" style="display: block;">
+
+      <div class="form-grid">
+        <label>Fecha <input type="date" id="fecha" required></label>
+        <label>Comanda <input type="number" id="comanda" required></label>
+        <label>Factura <input type="number" id="factura" required></label>
+        <label>Tipo de Cliente
+          <select id="tipoCliente" onchange="cambiarTipoCliente()">
+            <option value="general">Cliente General</option>
+            <option value="normal">Cliente Normal</option>
+            <option value="preferencial">Cliente Preferencial</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Sección de Cliente Normal -->
+      <div id="clienteNormalSection" style="display: none;">
+        <h3><i class="fas fa-user"></i> Buscar Cliente Normal</h3>
+        <div class="autocomplete-container">
+          <input type="text" id="clienteInput" placeholder="Buscar cliente normal..." autocomplete="off">
+          <input type="hidden" id="clienteSelected" value="">
+          <div id="clientesList" class="autocomplete-dropdown"></div>
+        </div>
+      </div>
+
+      <!-- Sección de Cliente Preferencial -->
+      <div id="clientePreferencialSection" style="display: none;">
+        <h3><i class="fas fa-star"></i> Buscar Cliente Preferencial</h3>
+        <div class="autocomplete-container">
+          <input type="text" id="clientePreferencialInput" placeholder="Buscar cliente preferencial..." autocomplete="off">
+          <input type="hidden" id="clientePreferencialSelected" value="">
+          <div id="clientesPreferencialesList" class="autocomplete-dropdown"></div>
+        </div>
+        
+        <!-- Información del cliente preferencial seleccionado -->
+        <div id="clientePreferencialInfo" style="display: none; margin-top: 15px;"></div>
+      </div>
+
+      <div class="form-grid">
+      </div>
+
+      <!-- Sección de Tarjeta de Fidelidad -->
+      <div id="tarjetaFidelidadSection" style="display: none; margin: 20px 0; padding: 20px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 15px; color: #ffffff; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);">
+        <h3 style="margin: 0 0 10px 0;"><i class="fas fa-credit-card"></i> Tarjeta de Fidelidad</h3>
+        <div id="tarjetaInfo"></div>
+      </div>
+
+      <h2>Cortes</h2>
+      <div id="cortesContainer"></div>
+      <button type="button" onclick="agregarCorte()">+ Agregar Corte</button>
+
+      <h2>Productos</h2>
+      <div id="productosContainer"></div>
+      <button type="button" onclick="agregarProducto()">+ Agregar Producto</button>
+
+      <div class="form-grid mt-4">
+        <label>Tipo de Pago <select id="tipoPago" onchange="manejarCambioTipoPago()">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="Mixto">Pago Mixto</option>
+          <option value="Otros">Otros</option>
+        </select></label>
+        <label>Precio Venta <input type="text" id="precioVenta" readonly></label>
+        <label>Descuento % <input type="number" id="descuento" min="0" max="100" step="0.01" placeholder="0" onchange="calcularTotal()"></label>
+        <label>Total a Pagar <input type="text" id="total" readonly></label>
+      </div>
+
+      <!-- Sección de Pago Mixto (inicialmente oculta) -->
+      <div id="pagoMixtoSection" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 15px; color: #ffffff;">
+        <h3 style="margin: 0 0 15px 0; color: #00fff5;"><i class="fas fa-credit-card"></i> Pago Mixto</h3>
+        <div class="form-grid">
+          <label style="color: #ffffff;">
+            Efectivo $
+            <input type="number" id="montoEfectivo" step="0.01" min="0" placeholder="0.00" onchange="calcularPagoMixto()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3);">
+          </label>
+          <label style="color: #ffffff;">
+            Transferencia/Tarjeta $
+            <input type="number" id="montoTarjeta" step="0.01" min="0" placeholder="0.00" onchange="calcularPagoMixto()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3);">
+          </label>
+          <label style="color: #ffffff;">
+            <span id="totalMixtoLabel">Total Ingresado: $0.00</span>
+            <div id="diferenciaPago" style="margin-top: 5px; font-weight: bold;"></div>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <button type="submit" id="btnGuardar" class="btn-primary">Guardar Factura</button>
+      </div>
+    </form>
+    
+    <!-- Filtros -->
+    <div class="card glass mb-3" id="filtrosFactura">
+      <div class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #f1f1f1;">
+        <i class="fas fa-filter"></i>
+        <span>Filtros de Consulta</span>
+      </div>
+      
+      <div class="form-grid">
+        <label>Desde <input type="date" id="filtroDesde"></label>
+        <label>Hasta <input type="date" id="filtroHasta"></label>
+        <label>Comanda <input type="number" id="filtroComanda" placeholder="Comanda"></label>
+        <label>Factura <input type="number" id="filtroFactura" placeholder="Factura"></label>
+
+        <label>Empleado
+          <select id="filtroEmpleado"><option value="">Todos</option></select>
+        </label>
+        <label>Cliente
+          <input type="text" id="filtroCliente" placeholder="Buscar cliente..." list="listaClientes">
+        </label>
+        <label>Pago
+          <select id="filtroPago">
+            <option value="">Todos</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="button-group" style="display: flex; gap: 10px; margin-top: 15px;">
+        <button id="btnAplicarFiltro" class="btn-search">
+          <i class="fas fa-filter"></i> Filtrar
+        </button>
+        <button id="btnLimpiarFiltro" class="btn-secondary">
+          <i class="fas fa-eraser"></i> Limpiar
+        </button>
+        <button type="button" id="exportarExcel" class="btn-search">
+          <i class="fas fa-file-excel"></i> Exportar Excel
+        </button>
+      </div>
+    </div>
+    <!-- Fin Filtros -->
+
+    <!-- Barra de búsqueda rápida -->
+    <div class="card glass" style="margin-bottom: 2rem;">
+      <div class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #f1f1f1;">
+        <i class="fas fa-search"></i>
+        <span>Búsqueda Rápida</span>
+      </div>
+      
+      <div class="form-group">
+        <input 
+          type="text" 
+          id="searchFacturas" 
+          placeholder="Buscar por cliente, empleado, factura..." 
+          style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff;"
+          onkeyup="buscarEnFacturas(this.value)"
+        >
+      </div>
+    </div>
+
+    <datalist id="listaClientes"></datalist>
+
+    <div class="card mt-4 glass">
+      <div class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #f1f1f1;">
+        <i class="fas fa-table"></i>
+        <span>Historial de Facturas</span>
+        <span id="contadorFacturas" style="margin-left: auto; font-size: 0.9em; color: #9fd81a;">0 registros</span>
+      </div>
+      
+      <!-- Contenedor de tabla con scroll -->
+      <div class="table-scroll-container">
+        <table id="tablaHistorial" class="scroll-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-calendar"></i> Fecha</th>
+              <th><i class="fas fa-receipt"></i> Factura</th>
+              <th><i class="fas fa-clipboard"></i> Comanda</th>
+              <th><i class="fas fa-user"></i> Cliente</th>
+              <th><i class="fas fa-credit-card"></i> Tipo Pago</th>
+              <th><i class="fas fa-dollar-sign"></i> Total</th>
+              <th><i class="fas fa-file-pdf"></i> PDF</th>
+              <th><i class="fas fa-cogs"></i> Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Paginación integrada -->
+      <div class="pagination-container" id="pagination" style="display: none;">
+        <div class="pagination-info">
+          <span id="paginationInfo">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="cambiarPagina('first')" class="pagination-btn" id="firstBtn">⏮</button>
+          <button onclick="cambiarPagina('prev')" class="pagination-btn" id="prevBtn">⏪</button>
+          <span class="pagination-numbers" id="pageNumbers"></span>
+          <button onclick="cambiarPagina('next')" class="pagination-btn" id="nextBtn">⏩</button>
+          <button onclick="cambiarPagina('last')" class="pagination-btn" id="lastBtn">⏭</button>
+        </div>
+        <div class="pagination-size">
+          <select id="pageSize" onchange="cambiarTamañoPagina()">
+            <option value="10">10 por página</option>
+            <option value="25" selected>25 por página</option>
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    /* ===================================================
+       ESTILOS PARA TABLA CON SCROLL Y PAGINACIÓN
+    =================================================== */
+    
+    .table-scroll-container {
+      width: 100%;
+      height: 60vh;
+      overflow: auto;
+      border: 2px solid rgba(159, 216, 26, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: #9fd81a rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #9fd81a;
+      border-radius: 6px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #8bc415;
+    }
+    
+    .scroll-table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+      background: transparent;
+    }
+    
+    .scroll-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(159, 216, 26, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .scroll-table th {
+      background: rgba(159, 216, 26, 0.15);
+      color: #9fd81a;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px 10px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(159, 216, 26, 0.2);
+      white-space: nowrap;
+      min-width: 120px;
+      position: sticky;
+      top: 0;
+    }
+    
+    .scroll-table td {
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    
+    .scroll-table tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .scroll-table tbody tr:hover {
+      background-color: rgba(159, 216, 26, 0.1);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Estilos para botones PDF */
+    .btn-pdf {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: #f44336;
+      color: white !important;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      font-size: 0.8rem;
+    }
+    
+    .btn-pdf:hover {
+      background-color: #d32f2f;
+      text-decoration: none;
+    }
+    
+    .btn-pdf i {
+      margin-right: 5px;
+    }
+
+    .btn-action {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-delete {
+      background-color: #ef476f;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background-color: #d63447;
+    }
+    
+    /* ===================================================
+       ESTILOS DE PAGINACIÓN INTEGRADA
+    =================================================== */
+    
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .pagination-info {
+      color: #f1f1f1;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .pagination-btn {
+      background: rgba(159, 216, 26, 0.2);
+      color: #9fd81a;
+      border: 1px solid rgba(159, 216, 26, 0.3);
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pagination-numbers {
+      display: flex;
+      gap: 3px;
+      margin: 0 10px;
+    }
+    
+    .page-number {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      min-width: 35px;
+      text-align: center;
+    }
+    
+    .page-number:hover {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .page-number.active {
+      background: #9fd81a;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .pagination-size select {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    
+    /* ===================================================
+       ESTILOS GENERALES
+    =================================================== */
+    
+    .section-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title i {
+      color: #9fd81a;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    /* ===================================================
+       RESPONSIVE
+    =================================================== */
+    
+    @media (max-width: 768px) {
+      .table-scroll-container {
+        height: 50vh;
+      }
+      
+      .scroll-table {
+        min-width: 700px;
+      }
+      
+      .scroll-table th,
+      .scroll-table td {
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        min-width: 80px;
+      }
+      
+      .pagination-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+
+    /* Estilos para autocompletado de clientes */
+    .autocomplete-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(187, 134, 252, 0.3);
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .autocomplete-dropdown.show {
+      display: block;
+    }
+
+    .autocomplete-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      color: #ffffff;
+      background: transparent;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.selected {
+      background: rgba(187, 134, 252, 0.4);
+      transform: translateX(3px);
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .cliente-nombre {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .cliente-dui {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .no-results {
+      padding: 15px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-style: italic;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Estilos para indicador de tarjeta de fidelidad */
+    .cliente-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .cliente-datos {
+      flex: 1;
+    }
+
+    .tarjeta-badge {
+      padding: 4px 8px;
+      border-radius: 15px;
+      font-size: 0.75em;
+      font-weight: bold;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    .tarjeta-activa {
+      background: rgba(40, 167, 69, 0.8);
+      color: white;
+      border: 1px solid rgba(40, 167, 69, 0.6);
+    }
+
+    .sin-tarjeta {
+      background: rgba(108, 117, 125, 0.6);
+      color: #ffffff;
+      border: 1px solid rgba(108, 117, 125, 0.4);
+    }
+
+    .tarjeta-badge i {
+      margin-right: 4px;
+    }
+
+    /* Estilos para clientes preferenciales */
+    .autocomplete-preferencial {
+      border-left: 3px solid #ffc107;
+      background: rgba(255, 193, 7, 0.1);
+    }
+
+    .cliente-empresa {
+      color: #ffc107;
+      font-size: 0.85em;
+      margin-top: 2px;
+    }
+
+    .descuento-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .descuento-badge {
+      background: rgba(40, 167, 69, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: bold;
+      border: 1px solid rgba(40, 167, 69, 0.6);
+    }
+
+    .cliente-preferencial-card {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .cliente-preferencial-card h4 {
+      margin: 0 0 10px 0;
+      color: #ffc107;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-item label {
+      font-weight: bold;
+      color: #f1f1f1;
+    }
+
+    .descuento-value {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    /* Secciones de clientes */
+    #clienteNormalSection,
+    #clientePreferencialSection {
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #clienteNormalSection h3 {
+      color: #9fd81a;
+      margin: 0 0 10px 0;
+    }
+
+    #clientePreferencialSection h3 {
+      color: #ffc107;
+      margin: 0 0 10px 0;
+    }
+  </style>
+  
+  <!-- Cargar el archivo JavaScript externo -->
+  <script src="factura.js"></script>
+  <!-- Sistema de autocompletado de clientes normales -->
+  <script src="clientes-autocompletado.js"></script>
+  <!-- Sistema de autocompletado de clientes preferenciales -->
+  <script src="clientes-preferenciales.js"></script>
+  <!-- Integración de tarjetas de fidelidad -->
+  <script src="tarjetas-integracion.js"></script>
+  
+  <script>
+    // Función para cambiar el tipo de cliente
+    function cambiarTipoCliente() {
+      const tipoCliente = document.getElementById('tipoCliente').value;
+      const clienteNormalSection = document.getElementById('clienteNormalSection');
+      const clientePreferencialSection = document.getElementById('clientePreferencialSection');
+      
+      // Ocultar todas las secciones primero
+      clienteNormalSection.style.display = 'none';
+      clientePreferencialSection.style.display = 'none';
+      
+      // Limpiar campos y descuentos
+      limpiarCamposClientes();
+      
+      // Mostrar la sección correspondiente
+      switch(tipoCliente) {
+        case 'normal':
+          clienteNormalSection.style.display = 'block';
+          break;
+        case 'preferencial':
+          clientePreferencialSection.style.display = 'block';
+          break;
+        case 'general':
+        default:
+          // No mostrar ninguna sección, cliente general
+          break;
+      }
+    }
+    
+    // Función para limpiar campos de clientes
+    function limpiarCamposClientes() {
+      // Limpiar cliente normal si existe
+      if (typeof limpiarClienteSeleccionado === 'function') {
+        limpiarClienteSeleccionado();
+      }
+      
+      // Limpiar cliente preferencial si existe
+      if (typeof limpiarClientePreferencialSeleccionado === 'function') {
+        limpiarClientePreferencialSeleccionado();
+      }
+      
+      // Limpiar descuento manual
+      const descuentoInput = document.getElementById('descuento');
+      if (descuentoInput) {
+        descuentoInput.value = '';
+        if (typeof calcularTotales === 'function') {
+          calcularTotales();
+        }
+      }
+    }
+    
+    // Función modificada para obtener el nombre del cliente activo
+    function obtenerNombreClienteActivo() {
+      const tipoCliente = document.getElementById('tipoCliente').value;
+      
+      switch(tipoCliente) {
+        case 'normal':
+          return typeof obtenerClienteSeleccionado === 'function' ? obtenerClienteSeleccionado() : '';
+        case 'preferencial':
+          return typeof obtenerClientePreferencialSeleccionado === 'function' ? obtenerClientePreferencialSeleccionado() : '';
+        case 'general':
+        default:
+          return ''; // Cliente General
+      }
+    }
+  </script>
+</body>
+</html>

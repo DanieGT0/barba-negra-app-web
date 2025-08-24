@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle de Cortes</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+    <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+      <i class="fas fa-arrow-left"></i> Centro de Reportes
+    </button>
+  </div>
+
+  <div class="container">
+    <h1><i class="fas fa-cut"></i> Resumen de cortes realizados</h1>
+    
+    <!-- Filtros de búsqueda y fecha -->
+    <div class="card glass" style="margin-bottom: 2rem;">
+      <div class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #f1f1f1;">
+        <i class="fas fa-filter"></i>
+        <span>Filtros de Búsqueda</span>
+      </div>
+      
+      <!-- Filtros en línea -->
+      <div style="display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 15px; align-items: end;">
+        <!-- Búsqueda por texto -->
+        <div class="form-group">
+          <label style="color: #f1f1f1; font-size: 0.9rem; margin-bottom: 5px;">
+            <i class="fas fa-search"></i> Buscar por empleado, servicio, factura...
+          </label>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Escribir para buscar..." 
+            style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff;"
+            onkeyup="aplicarFiltros()"
+          >
+        </div>
+        
+        <!-- Filtro fecha desde -->
+        <div class="form-group">
+          <label style="color: #f1f1f1; font-size: 0.9rem; margin-bottom: 5px;">
+            <i class="fas fa-calendar-plus"></i> Fecha desde (dd/mm/yyyy):
+          </label>
+          <div style="position: relative;">
+            <input 
+              type="text" 
+              id="fechaDesde" 
+              placeholder="dd/mm/yyyy"
+              readonly
+              style="padding: 10px 40px 10px 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; min-width: 150px; cursor: pointer;"
+              onclick="document.getElementById('fechaDesdeCalendar').showPicker()"
+            >
+            <input 
+              type="date" 
+              id="fechaDesdeCalendar"
+              style="position: absolute; opacity: 0; pointer-events: none;"
+              onchange="sincronizarFechaDesde()"
+            >
+            <i class="fas fa-calendar-alt" 
+               style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #9fd81a; cursor: pointer; pointer-events: none;"></i>
+          </div>
+        </div>
+        
+        <!-- Filtro fecha hasta -->
+        <div class="form-group">
+          <label style="color: #f1f1f1; font-size: 0.9rem; margin-bottom: 5px;">
+            <i class="fas fa-calendar-minus"></i> Fecha hasta (dd/mm/yyyy):
+          </label>
+          <div style="position: relative;">
+            <input 
+              type="text" 
+              id="fechaHasta" 
+              placeholder="dd/mm/yyyy"
+              readonly
+              style="padding: 10px 40px 10px 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; min-width: 150px; cursor: pointer;"
+              onclick="document.getElementById('fechaHastaCalendar').showPicker()"
+            >
+            <input 
+              type="date" 
+              id="fechaHastaCalendar"
+              style="position: absolute; opacity: 0; pointer-events: none;"
+              onchange="sincronizarFechaHasta()"
+            >
+            <i class="fas fa-calendar-alt" 
+               style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #9fd81a; cursor: pointer; pointer-events: none;"></i>
+          </div>
+        </div>
+        
+        <!-- Botón limpiar filtros -->
+        <div class="form-group">
+          <button 
+            onclick="limpiarFiltros()" 
+            class="btn-secondary"
+            style="padding: 10px 15px; min-width: 120px;"
+            title="Limpiar todos los filtros"
+          >
+            <i class="fas fa-eraser"></i> Limpiar
+          </button>
+        </div>
+        
+        <!-- Indicador de filtros activos -->
+        <div class="form-group">
+          <div id="indicadorFiltros" style="color: #9fd81a; font-size: 0.85rem; text-align: center; min-width: 100px;">
+            <i class="fas fa-info-circle"></i><br>
+            <span id="textoFiltros">Sin filtros</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card glass mt-4">
+      <div class="section-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #f1f1f1;">
+        <i class="fas fa-table"></i>
+        <span>Detalle de Cortes</span>
+        <span id="contadorRegistros" style="margin-left: auto; font-size: 0.9em; color: #9fd81a;">0 registros</span>
+      </div>
+      
+      <div class="button-group" style="margin-bottom: 15px;">
+        <button id="exportarExcel" class="btn-search">
+          <i class="fas fa-file-excel"></i> Exportar Excel
+        </button>
+      </div>
+      
+      <!-- Contenedor de tabla con scroll -->
+      <div class="table-scroll-container">
+        <table id="tablaDetalleCortes" class="scroll-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-calendar"></i> Fecha</th>
+              <th><i class="fas fa-receipt"></i> Factura</th>
+              <th><i class="fas fa-clipboard"></i> Comanda</th>
+              <th><i class="fas fa-user-tie"></i> Empleado</th>
+              <th><i class="fas fa-cut"></i> Servicio</th>
+              <th><i class="fas fa-sort-numeric-up"></i> Cantidad</th>
+              <th><i class="fas fa-dollar-sign"></i> Total</th>
+              <th><i class="fas fa-percentage"></i> Comisión</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Paginación integrada -->
+      <div class="pagination-container" id="pagination" style="display: none;">
+        <div class="pagination-info">
+          <span id="paginationInfo">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="cambiarPagina('first')" class="pagination-btn" id="firstBtn">⏮</button>
+          <button onclick="cambiarPagina('prev')" class="pagination-btn" id="prevBtn">⏪</button>
+          <span class="pagination-numbers" id="pageNumbers"></span>
+          <button onclick="cambiarPagina('next')" class="pagination-btn" id="nextBtn">⏩</button>
+          <button onclick="cambiarPagina('last')" class="pagination-btn" id="lastBtn">⏭</button>
+        </div>
+        <div class="pagination-size">
+          <select id="pageSize" onchange="cambiarTamañoPagina()">
+            <option value="10">10 por página</option>
+            <option value="25" selected>25 por página</option>
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* ===================================================
+       ESTILOS PARA TABLA CON SCROLL Y PAGINACIÓN
+    =================================================== */
+    
+    .table-scroll-container {
+      width: 100%;
+      height: 60vh;
+      overflow: auto;
+      border: 2px solid rgba(159, 216, 26, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: #9fd81a rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #9fd81a;
+      border-radius: 6px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #8bc415;
+    }
+    
+    .scroll-table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+      background: transparent;
+    }
+    
+    .scroll-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(159, 216, 26, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .scroll-table th {
+      background: rgba(159, 216, 26, 0.15);
+      color: #9fd81a;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px 10px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(159, 216, 26, 0.2);
+      white-space: nowrap;
+      min-width: 120px;
+      position: sticky;
+      top: 0;
+    }
+    
+    .scroll-table td {
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    
+    .scroll-table tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .scroll-table tbody tr:hover {
+      background-color: rgba(159, 216, 26, 0.1);
+      transition: background-color 0.3s ease;
+    }
+    
+    /* ===================================================
+       ESTILOS DE PAGINACIÓN INTEGRADA
+    =================================================== */
+    
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .pagination-info {
+      color: #f1f1f1;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .pagination-btn {
+      background: rgba(159, 216, 26, 0.2);
+      color: #9fd81a;
+      border: 1px solid rgba(159, 216, 26, 0.3);
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pagination-numbers {
+      display: flex;
+      gap: 3px;
+      margin: 0 10px;
+    }
+    
+    .page-number {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      min-width: 35px;
+      text-align: center;
+    }
+    
+    .page-number:hover {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .page-number.active {
+      background: #9fd81a;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .pagination-size select {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    
+    /* ===================================================
+       ESTILOS GENERALES Y FILTROS
+    =================================================== */
+    
+    .section-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title i {
+      color: #9fd81a;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Estilos específicos para los campos de fecha con calendario */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    /* Hover effect para los campos de fecha */
+    input[readonly]:hover {
+      background: rgba(255,255,255,0.15) !important;
+      border-color: rgba(159, 216, 26, 0.5) !important;
+    }
+
+    /* Estilo del ícono de calendario */
+    .fas.fa-calendar-alt:hover {
+      color: #fff !important;
+    }
+    
+    /* ===================================================
+       RESPONSIVE
+    =================================================== */
+    
+    @media (max-width: 768px) {
+      .table-scroll-container {
+        height: 50vh;
+      }
+      
+      .scroll-table {
+        min-width: 600px;
+      }
+      
+      .scroll-table th,
+      .scroll-table td {
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        min-width: 80px;
+      }
+      
+      .pagination-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      /* Filtros responsive */
+      div[style*="grid-template-columns: 1fr auto auto auto auto"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+
+<script>
+    // ===================================================
+    // VARIABLES GLOBALES PARA PAGINACIÓN Y FILTROS
+    // ===================================================
+    
+    let todosLosCortes = [];
+    let cortesFiltrados = [];
+    
+    // Configuración de paginación
+    let paginacion = {
+      paginaActual: 1,
+      tamañoPagina: 25,
+      totalPaginas: 1
+    };
+
+    // ===================================================
+    // INICIALIZACIÓN
+    // ===================================================
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarDetalleCortes();
+      document.getElementById('exportarExcel').addEventListener('click', exportarExcel);
+    });
+
+    // ===================================================
+    // FUNCIONES DE SINCRONIZACIÓN DE CALENDARIOS
+    // ===================================================
+    
+    function sincronizarFechaDesde() {
+      const fechaCalendar = document.getElementById('fechaDesdeCalendar').value;
+      const campoTexto = document.getElementById('fechaDesde');
+      
+      if (fechaCalendar) {
+        // Convertir de yyyy-mm-dd a dd/mm/yyyy
+        const [año, mes, dia] = fechaCalendar.split('-');
+        const fechaFormateada = `${dia}/${mes}/${año}`;
+        campoTexto.value = fechaFormateada;
+        
+        console.log(`📅 Fecha desde seleccionada: ${fechaFormateada}`);
+        aplicarFiltros();
+      }
+    }
+    
+    function sincronizarFechaHasta() {
+      const fechaCalendar = document.getElementById('fechaHastaCalendar').value;
+      const campoTexto = document.getElementById('fechaHasta');
+      
+      if (fechaCalendar) {
+        // Convertir de yyyy-mm-dd a dd/mm/yyyy
+        const [año, mes, dia] = fechaCalendar.split('-');
+        const fechaFormateada = `${dia}/${mes}/${año}`;
+        campoTexto.value = fechaFormateada;
+        
+        console.log(`📅 Fecha hasta seleccionada: ${fechaFormateada}`);
+        aplicarFiltros();
+      }
+    }
+
+    // ===================================================
+    // FUNCIONES DE CARGA DE DATOS
+    // ===================================================
+    
+    async function cargarDetalleCortes() {
+      try {
+        console.log('🔄 Cargando detalle de cortes...');
+        const res = await fetch('/api/detalle_cortes');
+        const cortes = await res.json();
+        
+        console.log(`✅ Cargados ${cortes.length} cortes del servidor`);
+        
+        // Guardar datos
+        todosLosCortes = cortes;
+        cortesFiltrados = [...cortes];
+        paginacion.paginaActual = 1;
+        
+        // Renderizar tabla y paginación
+        renderizarTabla();
+        actualizarPaginacion();
+        actualizarIndicadorFiltros();
+        
+        console.log(`✅ Datos procesados correctamente`);
+      } catch (error) {
+        console.error('❌ Error al cargar cortes:', error);
+        mostrarError('Error al cargar los datos de cortes');
+      }
+    }
+
+    // ===================================================
+    // FUNCIONES DE FILTRADO SIMPLIFICADAS PARA dd/mm/yyyy
+    // ===================================================
+    
+    function aplicarFiltros() {
+      const textoBusqueda = document.getElementById('searchInput').value.toLowerCase().trim();
+      const fechaDesde = document.getElementById('fechaDesde').value.trim();
+      const fechaHasta = document.getElementById('fechaHasta').value.trim();
+      
+      console.log(`🔍 Aplicando filtros - Texto: "${textoBusqueda}", Desde: "${fechaDesde}", Hasta: "${fechaHasta}"`);
+      
+      cortesFiltrados = todosLosCortes.filter(corte => {
+        // Filtro de texto
+        let cumpleTexto = true;
+        if (textoBusqueda) {
+          cumpleTexto = 
+            corte.empleado.toLowerCase().includes(textoBusqueda) ||
+            corte.nombre.toLowerCase().includes(textoBusqueda) ||
+            corte.fecha.includes(textoBusqueda) ||
+            corte.factura.toString().includes(textoBusqueda) ||
+            corte.comanda.toString().includes(textoBusqueda);
+        }
+        
+        // Filtro de rango de fechas (formato dd/mm/yyyy)
+        let cumpleFecha = true;
+        if (fechaDesde || fechaHasta) {
+          const fechaCorte = corte.fecha;
+          
+          // Validar fecha desde
+          if (fechaDesde && esFechaValida(fechaDesde)) {
+            cumpleFecha = cumpleFecha && compararFechas(fechaCorte, fechaDesde) >= 0;
+          }
+          
+          // Validar fecha hasta
+          if (fechaHasta && esFechaValida(fechaHasta)) {
+            cumpleFecha = cumpleFecha && compararFechas(fechaCorte, fechaHasta) <= 0;
+          }
+        }
+        
+        return cumpleTexto && cumpleFecha;
+      });
+      
+      console.log(`📊 Filtros aplicados: ${cortesFiltrados.length} de ${todosLosCortes.length} registros`);
+      
+      paginacion.paginaActual = 1;
+      renderizarTabla();
+      actualizarPaginacion();
+      actualizarIndicadorFiltros();
+    }
+    
+    // Función para validar formato dd/mm/yyyy
+    function esFechaValida(fecha) {
+      if (!fecha || typeof fecha !== 'string') return false;
+      
+      const patron = /^\d{2}\/\d{2}\/\d{4}$/;
+      if (!patron.test(fecha)) return false;
+      
+      const partes = fecha.split('/');
+      const dia = parseInt(partes[0], 10);
+      const mes = parseInt(partes[1], 10);
+      const año = parseInt(partes[2], 10);
+      
+      return dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && año >= 1900 && año <= 2100;
+    }
+    
+    // Función para comparar fechas en formato dd/mm/yyyy
+    // Retorna: -1 si fecha1 < fecha2, 0 si iguales, 1 si fecha1 > fecha2
+    function compararFechas(fecha1, fecha2) {
+      if (!esFechaValida(fecha1) || !esFechaValida(fecha2)) return 0;
+      
+      const [dia1, mes1, año1] = fecha1.split('/').map(Number);
+      const [dia2, mes2, año2] = fecha2.split('/').map(Number);
+      
+      // Comparar por año, luego mes, luego día
+      if (año1 !== año2) return año1 - año2;
+      if (mes1 !== mes2) return mes1 - mes2;
+      return dia1 - dia2;
+    }
+    
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('fechaDesde').value = '';
+      document.getElementById('fechaHasta').value = '';
+      document.getElementById('fechaDesdeCalendar').value = '';
+      document.getElementById('fechaHastaCalendar').value = '';
+      
+      cortesFiltrados = [...todosLosCortes];
+      paginacion.paginaActual = 1;
+      
+      renderizarTabla();
+      actualizarPaginacion();
+      actualizarIndicadorFiltros();
+      
+      console.log('🧹 Filtros limpiados - Mostrando todos los registros');
+    }
+    
+    function actualizarIndicadorFiltros() {
+      const textoBusqueda = document.getElementById('searchInput').value.trim();
+      const fechaDesde = document.getElementById('fechaDesde').value.trim();
+      const fechaHasta = document.getElementById('fechaHasta').value.trim();
+      const indicador = document.getElementById('textoFiltros');
+      
+      let filtrosActivos = [];
+      
+      if (textoBusqueda) {
+        filtrosActivos.push('Texto');
+      }
+      
+      if (fechaDesde && fechaHasta && esFechaValida(fechaDesde) && esFechaValida(fechaHasta)) {
+        filtrosActivos.push(`${fechaDesde} - ${fechaHasta}`);
+      } else if (fechaDesde && esFechaValida(fechaDesde)) {
+        filtrosActivos.push(`≥ ${fechaDesde}`);
+      } else if (fechaHasta && esFechaValida(fechaHasta)) {
+        filtrosActivos.push(`≤ ${fechaHasta}`);
+      }
+      
+      if (filtrosActivos.length === 0) {
+        indicador.innerHTML = 'Sin filtros';
+        indicador.style.color = '#9fd81a';
+      } else {
+        indicador.innerHTML = filtrosActivos.join('<br>');
+        indicador.style.color = '#00aaff';
+      }
+    }
+
+    // ===================================================
+    // FUNCIONES DE BÚSQUEDA CORREGIDAS (MANTENER COMPATIBILIDAD)
+    // ===================================================
+    
+    function buscarEnTabla(texto) {
+      // Actualizar el campo de búsqueda y aplicar filtros
+      document.getElementById('searchInput').value = texto;
+      aplicarFiltros();
+    }
+
+    // ===================================================
+    // FUNCIONES DE RENDERIZADO CON TOTALES GENERALES
+    // ===================================================
+    
+    function renderizarTabla() {
+      const tbody = document.querySelector('#tablaDetalleCortes tbody');
+      tbody.innerHTML = '';
+
+      if (cortesFiltrados.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="8" style="text-align: center; padding: 40px;">No hay datos para mostrar</td>';
+        tbody.appendChild(row);
+        document.getElementById('pagination').style.display = 'none';
+        document.getElementById('contadorRegistros').textContent = '0 registros';
+        return;
+      }
+
+      // ✅ CORRECCIÓN: Calcular paginación correctamente
+      paginacion.totalPaginas = Math.ceil(cortesFiltrados.length / paginacion.tamañoPagina);
+      
+      // ✅ CORRECCIÓN: Validar que la página actual no exceda el total
+      if (paginacion.paginaActual > paginacion.totalPaginas) {
+        paginacion.paginaActual = paginacion.totalPaginas;
+      }
+      if (paginacion.paginaActual < 1) {
+        paginacion.paginaActual = 1;
+      }
+
+      // Calcular datos para la página actual
+      const inicio = (paginacion.paginaActual - 1) * paginacion.tamañoPagina;
+      const fin = inicio + paginacion.tamañoPagina;
+      const datosPagina = cortesFiltrados.slice(inicio, fin);
+
+      console.log(`📊 Renderizando página ${paginacion.paginaActual} de ${paginacion.totalPaginas}`);
+      console.log(`📊 Mostrando registros ${inicio + 1} a ${Math.min(fin, cortesFiltrados.length)} de ${cortesFiltrados.length} total`);
+
+      // ========================================
+      // CALCULAR TOTALES GENERALES (TODOS LOS REGISTROS FILTRADOS)
+      // ========================================
+      let totalGeneralCantidad = 0;
+      let totalGeneralVentas = 0;
+      let totalGeneralComisiones = 0;
+
+      cortesFiltrados.forEach(c => {
+        const cantidad = parseInt(c.cantidad) || 1;
+        const total = parseFloat(c.total) || 0;
+        const comision = parseFloat(c.comision) || 0;
+        
+        totalGeneralCantidad += cantidad;
+        totalGeneralVentas += total;
+        totalGeneralComisiones += comision;
+      });
+
+      // ========================================
+      // CALCULAR TOTALES DE LA PÁGINA ACTUAL
+      // ========================================
+      let totalCantidadPagina = 0;
+      let totalVentasPagina = 0;
+      let totalComisionesPagina = 0;
+
+      // Renderizar filas de la página actual
+      datosPagina.forEach(c => {
+        const cantidad = parseInt(c.cantidad) || 1;
+        const total = parseFloat(c.total) || 0;
+        const comision = parseFloat(c.comision) || 0;
+        
+        totalCantidadPagina += cantidad;
+        totalVentasPagina += total;
+        totalComisionesPagina += comision;
+        
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${c.fecha}</td>
+          <td>${c.factura}</td>
+          <td>${c.comanda}</td>
+          <td>${c.empleado}</td>
+          <td>${c.nombre}</td>
+          <td>${cantidad}</td>
+          <td>${total.toFixed(2)}</td>
+          <td>${comision.toFixed(2)}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+      
+      // ========================================
+      // AGREGAR FILA DE TOTALES GENERALES (NUEVO)
+      // ========================================
+      const filaTotalesGenerales = document.createElement('tr');
+      filaTotalesGenerales.style.cssText = 'background-color: rgba(0, 150, 255, 0.15); font-weight: bold; border: 2px solid rgba(0, 150, 255, 0.4); color: #00aaff;';
+      filaTotalesGenerales.innerHTML = `
+        <td colspan="5" style="text-align: center; font-size: 0.9rem;">
+          <i class="fas fa-calculator"></i> TOTALES GENERALES (${cortesFiltrados.length} registros)
+        </td>
+        <td style="font-weight: bold; color: #00aaff;">${totalGeneralCantidad.toLocaleString()}</td>
+        <td style="font-weight: bold; color: #00aaff;">${totalGeneralVentas.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td style="font-weight: bold; color: #00aaff;">${totalGeneralComisiones.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+      `;
+      tbody.appendChild(filaTotalesGenerales);
+
+      // ========================================
+      // AGREGAR FILA DE TOTALES DE PÁGINA (EXISTENTE MEJORADO)
+      // ========================================
+      const filaTotalesPagina = document.createElement('tr');
+      filaTotalesPagina.style.cssText = 'background-color: rgba(159, 216, 26, 0.1); font-weight: bold; border-top: 2px solid rgba(159, 216, 26, 0.3);';
+      filaTotalesPagina.innerHTML = `
+        <td colspan="5" style="text-align: center; font-size: 0.85rem;">
+          <i class="fas fa-file-alt"></i> TOTALES DE PÁGINA (${datosPagina.length} registros)
+        </td>
+        <td>${totalCantidadPagina}</td>
+        <td>${totalVentasPagina.toFixed(2)}</td>
+        <td>${totalComisionesPagina.toFixed(2)}</td>
+      `;
+      tbody.appendChild(filaTotalesPagina);
+
+      // ========================================
+      // ACTUALIZAR CONTADOR CON TOTAL GENERAL
+      // ========================================
+      document.getElementById('contadorRegistros').textContent = `${cortesFiltrados.length} registros | Total: ${totalGeneralVentas.toFixed(2)}`;
+      
+      // Mostrar paginación si hay datos
+      document.getElementById('pagination').style.display = cortesFiltrados.length > 0 ? 'flex' : 'none';
+    }
+
+    function mostrarError(mensaje) {
+      const tbody = document.querySelector('#tablaDetalleCortes tbody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 40px; color: #ef476f;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+            ${mensaje}
+          </td>
+        </tr>
+      `;
+      document.getElementById('pagination').style.display = 'none';
+      document.getElementById('contadorRegistros').textContent = '0 registros';
+    }
+
+    // ===================================================
+    // FUNCIONES DE PAGINACIÓN CORREGIDAS
+    // ===================================================
+    
+    function actualizarPaginacion() {
+      const totalRegistros = cortesFiltrados.length;
+      paginacion.totalPaginas = Math.ceil(totalRegistros / paginacion.tamañoPagina);
+      
+      // ✅ CORRECCIÓN: Validar límites de página
+      if (paginacion.totalPaginas === 0) {
+        paginacion.totalPaginas = 1;
+        paginacion.paginaActual = 1;
+      }
+      
+      // Actualizar información
+      const inicio = (paginacion.paginaActual - 1) * paginacion.tamañoPagina + 1;
+      const fin = Math.min(paginacion.paginaActual * paginacion.tamañoPagina, totalRegistros);
+      
+      document.getElementById('paginationInfo').textContent = 
+        totalRegistros === 0 ? 'No hay registros' : `Mostrando ${inicio}-${fin} de ${totalRegistros} registros`;
+      
+      // ✅ CORRECCIÓN: Deshabilitar botones correctamente
+      document.getElementById('firstBtn').disabled = paginacion.paginaActual === 1 || totalRegistros === 0;
+      document.getElementById('prevBtn').disabled = paginacion.paginaActual === 1 || totalRegistros === 0;
+      document.getElementById('nextBtn').disabled = paginacion.paginaActual === paginacion.totalPaginas || totalRegistros === 0;
+      document.getElementById('lastBtn').disabled = paginacion.paginaActual === paginacion.totalPaginas || totalRegistros === 0;
+      
+      // Actualizar números de página
+      actualizarNumerosPagina();
+    }
+    
+    function actualizarNumerosPagina() {
+      const numbersContainer = document.getElementById('pageNumbers');
+      numbersContainer.innerHTML = '';
+      
+      const totalPaginas = paginacion.totalPaginas;
+      const paginaActual = paginacion.paginaActual;
+      
+      // ✅ CORRECCIÓN: No mostrar números si no hay datos
+      if (cortesFiltrados.length === 0) {
+        return;
+      }
+      
+      let inicio = Math.max(1, paginaActual - 2);
+      let fin = Math.min(totalPaginas, paginaActual + 2);
+      
+      if (fin - inicio < 4) {
+        if (inicio === 1) {
+          fin = Math.min(totalPaginas, 5);
+        } else {
+          inicio = Math.max(1, totalPaginas - 4);
+        }
+      }
+      
+      for (let i = inicio; i <= fin; i++) {
+        const pageBtn = document.createElement('span');
+        pageBtn.className = `page-number ${i === paginaActual ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => irAPagina(i);
+        numbersContainer.appendChild(pageBtn);
+      }
+    }
+    
+    // ✅ FUNCIONES DE NAVEGACIÓN CORREGIDAS
+    function cambiarPagina(direccion) {
+      switch (direccion) {
+        case 'first':
+          paginacion.paginaActual = 1;
+          break;
+        case 'prev':
+          if (paginacion.paginaActual > 1) paginacion.paginaActual--;
+          break;
+        case 'next':
+          if (paginacion.paginaActual < paginacion.totalPaginas) paginacion.paginaActual++;
+          break;
+        case 'last':
+          paginacion.paginaActual = paginacion.totalPaginas;
+          break;
+      }
+      
+      // ✅ CORRECCIÓN: Solo re-renderizar la tabla, no cargar datos
+      renderizarTabla();
+      actualizarPaginacion();
+    }
+    
+    function irAPagina(pagina) {
+      if (pagina >= 1 && pagina <= paginacion.totalPaginas) {
+        paginacion.paginaActual = pagina;
+        renderizarTabla();
+        actualizarPaginacion();
+      }
+    }
+    
+    function cambiarTamañoPagina() {
+      paginacion.tamañoPagina = parseInt(document.getElementById('pageSize').value);
+      paginacion.paginaActual = 1;
+      renderizarTabla();
+      actualizarPaginacion();
+    }
+
+    // ===================================================
+    // FUNCIÓN DE EXPORTACIÓN CORREGIDA CON TOTALES INCLUIDOS
+    // ===================================================
+    
+    function exportarExcel() {
+      // ✅ CORRECCIÓN: Verificar datos filtrados en lugar de solo los visibles
+      if (cortesFiltrados.length === 0) {
+        alert('⚠️ No hay datos para exportar');
+        return;
+      }
+      
+      try {
+        console.log(`📊 Exportando ${cortesFiltrados.length} cortes a Excel...`);
+        
+        // ========================================
+        // CALCULAR TOTALES PARA EL EXCEL
+        // ========================================
+        let totalCantidad = 0;
+        let totalVentas = 0;
+        let totalComisiones = 0;
+
+        // ✅ CORRECCIÓN: Crear datos para Excel desde cortesFiltrados (no desde la tabla visible)
+        const datosExcel = cortesFiltrados.map(c => {
+          const cantidad = parseInt(c.cantidad) || 1;
+          const total = parseFloat(c.total || 0);
+          const comision = parseFloat(c.comision || 0);
+          
+          // Sumar a los totales
+          totalCantidad += cantidad;
+          totalVentas += total;
+          totalComisiones += comision;
+          
+          return {
+            'Fecha': c.fecha,
+            'Factura': c.factura,
+            'Comanda': c.comanda,
+            'Empleado': c.empleado,
+            'Servicio': c.nombre,
+            'Cantidad': cantidad,
+            'Total': total.toFixed(2),
+            'Comisión': comision.toFixed(2)
+          };
+        });
+        
+        // ========================================
+        // AGREGAR FILA DE TOTALES AL EXCEL
+        // ========================================
+        datosExcel.push({
+          'Fecha': '',
+          'Factura': '',
+          'Comanda': '',
+          'Empleado': '',
+          'Servicio': `TOTALES (${cortesFiltrados.length} registros)`,
+          'Cantidad': totalCantidad,
+          'Total': totalVentas.toFixed(2),
+          'Comisión': totalComisiones.toFixed(2)
+        });
+        
+        // ========================================
+        // AGREGAR INFORMACIÓN DE FILTROS AL EXCEL
+        // ========================================
+        const textoBusqueda = document.getElementById('searchInput').value.trim();
+        const fechaDesde = document.getElementById('fechaDesde').value.trim();
+        const fechaHasta = document.getElementById('fechaHasta').value.trim();
+        
+        if (textoBusqueda || fechaDesde || fechaHasta) {
+          let infoFiltros = {
+            'Fecha': 'FILTROS APLICADOS:',
+            'Factura': textoBusqueda ? `Texto: ${textoBusqueda}` : '',
+            'Comanda': '',
+            'Empleado': '',
+            'Servicio': `Total registros originales: ${todosLosCortes.length}`,
+            'Cantidad': `Registros filtrados: ${cortesFiltrados.length}`,
+            'Total': '',
+            'Comisión': ''
+          };
+          
+          // Construir información de rango de fechas
+          if (fechaDesde && fechaHasta) {
+            infoFiltros['Comanda'] = `Rango: ${fechaDesde} - ${fechaHasta}`;
+          } else if (fechaDesde) {
+            infoFiltros['Comanda'] = `Desde: ${fechaDesde}`;
+          } else if (fechaHasta) {
+            infoFiltros['Comanda'] = `Hasta: ${fechaHasta}`;
+          }
+          
+          datosExcel.unshift(infoFiltros);
+          
+          // Agregar una fila vacía para separar
+          datosExcel.unshift({
+            'Fecha': '',
+            'Factura': '',
+            'Comanda': '',
+            'Empleado': '',
+            'Servicio': '',
+            'Cantidad': '',
+            'Total': '',
+            'Comisión': ''
+          });
+        }
+        
+        // ✅ CORRECCIÓN: Crear libro de Excel desde los datos, no desde la tabla HTML
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(datosExcel);
+        
+        // ========================================
+        // FORMATEAR LA FILA DE TOTALES EN EL EXCEL
+        // ========================================
+        const totalRowIndex = datosExcel.length; // Índice de la fila de totales (base 1)
+        
+        // Aplicar formato bold a la fila de totales
+        for (let col = 0; col < 8; col++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: totalRowIndex, c: col });
+          if (!ws[cellAddress]) ws[cellAddress] = {};
+          if (!ws[cellAddress].s) ws[cellAddress].s = {};
+          ws[cellAddress].s.font = { bold: true };
+          ws[cellAddress].s.fill = { fgColor: { rgb: "E8F5E8" } }; // Fondo verde claro
+        }
+        
+        // Configurar anchos de columna
+        ws['!cols'] = [
+          { wch: 12 }, // Fecha
+          { wch: 10 }, // Factura
+          { wch: 10 }, // Comanda
+          { wch: 20 }, // Empleado
+          { wch: 25 }, // Servicio
+          { wch: 10 }, // Cantidad
+          { wch: 12 }, // Total
+          { wch: 12 }  // Comisión
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws, "DetalleCortes");
+        
+        // ✅ CORRECCIÓN: Nombre del archivo más descriptivo
+        const fechaActual = new Date().toISOString().split('T')[0];
+        let nombreArchivo = `detalle_cortes_${fechaActual}`;
+        
+        // Agregar información de filtros al nombre del archivo
+        if (fechaDesde || fechaHasta) {
+          if (fechaDesde && fechaHasta) {
+            const fechaInicioArchivo = fechaDesde.replace(/\//g, '');
+            const fechaFinArchivo = fechaHasta.replace(/\//g, '');
+            nombreArchivo += `_${fechaInicioArchivo}_${fechaFinArchivo}`;
+          } else if (fechaDesde) {
+            const fechaInicioArchivo = fechaDesde.replace(/\//g, '');
+            nombreArchivo += `_desde_${fechaInicioArchivo}`;
+          } else if (fechaHasta) {
+            const fechaFinArchivo = fechaHasta.replace(/\//g, '');
+            nombreArchivo += `_hasta_${fechaFinArchivo}`;
+          }
+        }
+        
+        nombreArchivo += '.xlsx';
+        
+        XLSX.writeFile(wb, nombreArchivo);
+        
+        console.log(`✅ Archivo Excel exportado: ${nombreArchivo}`);
+        console.log(`📊 Registros exportados: ${cortesFiltrados.length}`);
+        console.log(`💰 Total exportado: ${totalVentas.toFixed(2)}`);
+        
+        // ✅ CORRECCIÓN: Mensaje más informativo con totales y filtros
+        let mensaje = `✅ Excel exportado exitosamente:
+📄 Archivo: ${nombreArchivo}
+📊 Registros: ${cortesFiltrados.length} de ${todosLosCortes.length} total
+💰 Total Ventas: ${totalVentas.toFixed(2)}
+💵 Total Comisiones: ${totalComisiones.toFixed(2)}
+✂️ Total Servicios: ${totalCantidad} cortes`;
+
+        if (textoBusqueda || fechaDesde || fechaHasta) {
+          mensaje += '\n\n🔍 Filtros aplicados:';
+          if (textoBusqueda) mensaje += `\n• Búsqueda: "${textoBusqueda}"`;
+          if (fechaDesde && fechaHasta) {
+            mensaje += `\n• Rango: ${fechaDesde} - ${fechaHasta}`;
+          } else if (fechaDesde) {
+            mensaje += `\n• Desde: ${fechaDesde}`;
+          } else if (fechaHasta) {
+            mensaje += `\n• Hasta: ${fechaHasta}`;
+          }
+        }
+        
+        alert(mensaje);
+        
+      } catch (error) {
+        console.error('❌ Error al exportar Excel:', error);
+        alert('❌ Error al exportar el archivo. Por favor, intenta nuevamente.');
+      }
+    }
+
+    console.log('✅ detalle_cortes.html cargado correctamente con filtros de fecha dd/mm/yyyy (formato centroamericano)');
+  </script>
+  
+</body>
+</html>

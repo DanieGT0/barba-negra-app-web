@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>CRUD Compras</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="toggle-form-container">
+      <button id="toggleFormBtn" class="btn-toggle">
+        <span>Mostrar/Ocultar Formulario</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+    <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+    <div id="formSection" class="card glass">
+      <h1>Registro de Compras</h1>
+      <form id="compraForm">
+        <input type="hidden" id="accion" name="accion" value="crear">
+        <input type="hidden" id="compra_id" name="compra_id">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="codigo">Código de Compra</label>
+            <input type="text" id="codigo" name="codigo" placeholder="Ej: C001" required>
+          </div>
+          <div class="form-group">
+            <label for="fecha">Fecha de Compra (dd/mm/yyyy)</label>
+            <input type="text" id="fecha" name="fecha" placeholder="dd/mm/yyyy" required>
+          </div>
+          <div class="form-group">
+            <label for="fecha_vencimiento">Fecha de Vencimiento (dd/mm/yyyy)</label>
+            <input type="text" id="fecha_vencimiento" name="fecha_vencimiento" placeholder="dd/mm/yyyy">
+          </div>
+          <div class="form-group">
+            <label for="codigo_producto">Producto</label>
+            <select id="codigo_producto" name="codigo_producto" required></select>
+          </div>
+          <div class="form-group">
+            <label for="precio_compra">Precio Compra</label>
+            <input type="number" step="0.01" id="precio_compra" name="precio_compra" required>
+          </div>
+          <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad" name="cantidad" required>
+          </div>
+        </div>
+        <div class="buttons-container">
+          <button type="submit" class="btn-primary" id="submitBtn">Guardar Compra</button>
+          <button type="button" class="btn-secondary" id="cancelBtn" style="display:none;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card glass mt-4">
+      <h2>Historial de Compras</h2>
+      <div class="search-container">
+        <select id="filtroProducto"><option value="">Todos los productos</option></select>
+        <input type="text" id="filtroDesde" placeholder="Desde (dd/mm/yyyy)">
+        <input type="text" id="filtroHasta" placeholder="Hasta (dd/mm/yyyy)">
+        <button id="filtrarBtn" class="btn-search"><i class="fas fa-search"></i></button>
+        <button id="excelBtn" class="btn-search"><i class="fas fa-file-excel"></i> Exportar</button>
+      </div>
+      <div class="table-responsive">
+        <table id="tablaCompras">
+          <thead>
+            <tr>
+              <th>Código Compra</th>
+              <th>Fecha</th>
+              <th>Fecha Venc.</th>
+              <th>Código Prod.</th>
+              <th>Producto</th>
+              <th>Precio Compra</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="compras.js"></script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+
+    :root {
+      --primary-color: #1a1a2e;
+      --secondary-color: #16213e;
+      --accent-color: #9fd81a;
+      --text-color: #f1f1f1;
+      --card-bg: rgba(26, 26, 46, 0.8);
+      --card-hover: rgba(22, 33, 62, 0.9);
+      --transition: all 0.3s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+  font-family: 'Poppins', sans-serif;
+  background: url('imagenes/fondo-barberia1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .logo { display: flex; align-items: center; gap: 1rem; }
+    .logo-icon { font-size: 2rem; color: var(--accent-color); }
+    h1 { font-size: 1.8rem; font-weight: 600; letter-spacing: 1px; }
+    .date-time { font-size: 0.9rem; color: rgba(241, 241, 241, 0.8); }
+
+    .dashboard-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;           /* elimina padding */
+  margin-left: 0;       /* elimina cualquier margen */
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-left: 1rem;   /* opcional: o usa 0 si quieres totalmente pegado */
+}
+
+/* ───── Logo circular en cabecera ───── */
+.logo-img {
+  height: 160px;          /* tamaño visible */
+  width: 160px;
+  border-radius: 50%;    /* círculo perfecto */
+  object-fit: cover;     /* recorte interno */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+.card-option {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height:70px;
+
+  /* Efecto glass */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Efecto hover más claro */
+.card-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+/* Efecto hover: aclarar tarjeta */
+.card-option:hover {
+  background: rgba(255, 255, 255, 0.1); /* un color mucho más claro */
+  transform: scale(1.03);
+}
+
+    .card-option i {
+      font-size: 1.0rem;
+      margin-bottom: 1rem;
+      color: var(--accent-color);
+    }
+
+    .card-option h3 {
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    .btn-logout {
+      background-color: #1a1a2e;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background-color: #0e0201;
+    }
+
+    /* Estilos para el dashboard de reportes */
+    .main-container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 1rem;
+    }
+
+    .reporte-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .reporte-card h2 {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    .controles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .control-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-grupo label {
+      font-size: 0.9rem;
+      color: rgba(241, 241, 241, 0.8);
+    }
+
+    .control-grupo select,
+    .control-grupo input {
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(22, 33, 62, 0.8);
+      color: var(--text-color);
+    }
+
+    .control-grupo button {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent-color);
+      color: #16213e;
+      font-weight: bold;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .control-grupo button:hover {
+      background: #b3ec2a;
+    }
+
+    .resumen-datos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .dato-card {
+      background: rgba(22, 33, 62, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .dato-titulo {
+      font-size: 0.9rem;
+      color: rgba(241, 241, 241, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    .dato-valor {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .dato-meta {
+      color: #9fd81a;
+    }
+
+    .dato-ventas {
+      color: #00b4d8;
+    }
+
+    .dato-porcentaje {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .dato-icon {
+      color: var(--accent-color);
+    }
+
+    .progreso-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progreso-barra {
+      height: 100%;
+      background: linear-gradient(90deg, #9fd81a 0%, #00b4d8 100%);
+      width: 0;
+      transition: width 1s ease;
+    }
+
+    .badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .graficos {
+      margin-bottom: 2rem;
+    }
+
+    .grafico-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .grafico-container {
+      background: rgba(22, 33, 62, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      height: 400px;
+    }
+
+    .btn-exportar {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .btn-exportar button {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-png {
+      background: #4c1d95;
+      color: white;
+    }
+
+    .btn-pdf {
+      background: #b91c1c;
+      color: white;
+    }
+
+    .btn-excel {
+      background: #166534;
+      color: white;
+    }
+
+    .btn-exportar button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-volver {
+      background-color: #1a1a2e;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-volver:hover {
+      background-color: #0e0201;
+    }
+
+    @media (max-width: 768px) {
+      header { flex-direction: column; gap: 0.5rem; text-align: center; }
+      .dashboard { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .card-option { height: 150px; }
+      .controles { flex-direction: column; }
+      .resumen-datos { grid-template-columns: 1fr; }
+    }
+    
+
+    .layout-principal {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 2rem;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem 0;
+      }
+      
+      .dashboard-container {
+        width: 280px;
+        flex-shrink: 0;
+      }
+      
+      .main-container {
+        flex: 1;
+      }
+      
+      @media (max-width: 768px) {
+        .layout-principal {
+          flex-direction: column;
+        }
+      
+        .dashboard-container {
+          width: 100%;
+        }
+      
+        .main-container {
+          width: 100%;
+        }
+      
+        .dashboard {
+          align-items: center;
+          padding: 0;
+        }
+      }
+
+      
+/* Añadir al final de indexstyles.css */
+
+/* Nuevo contenedor de vidrio para el menú */
+.menu-glass-container {
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Ajustes para los botones del menú dentro del contenedor de vidrio */
+.menu-glass-container .card-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Efectos hover más sutiles para los botones dentro del contenedor de vidrio */
+.menu-glass-container .card-option:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Título opcional para el menú */
+.menu-title {
+  color: var(--accent-color);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+  .menu-glass-container {
+    padding: 1rem;
+  }
+  
+  .menu-glass-container .card-option {
+    height: auto;
+    padding: 1rem;
+  }
+}      
+
+/* Por ejemplo, un rojo anaranjado */
+.sucursal-escalon {
+  color: #ff5733;   /* cambia este valor al color que prefieras */
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Citas - Barbershop</title>
+  <link rel="stylesheet" href="citas.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+</head>
+
+<body>
+
+  <header>
+    <span class="logo"><i class="fas fa-cut"></i></span>
+    Agenda de Citas - Barbershop
+  </header>
+  
+  
+  <div class="container">
+    <div class="panel">
+      <div class="acciones">
+        <button class="btn" onclick="cambiarVista('dayGridMonth')">
+          <i class="fas fa-calendar-alt"></i> Mes
+        </button>
+        
+        <button class="btn btn-outline" onclick="cambiarVista('timeGridWeek')">
+          <i class="fas fa-calendar-week"></i> Semana
+        </button>
+        <button class="btn btn-outline" onclick="cambiarVista('timeGridDay')">
+          <i class="fas fa-calendar-day"></i> Día
+        </button>
+        <button class="btn" id="nuevaCita">
+          <i class="fas fa-plus"></i> Nueva Cita
+        </button>
+        <button class="btn btn-outline" id="exportarExcel">
+          <i class="fas fa-file-export"></i> Exportar a Excel
+        </button>
+        <button onclick="location.href='/indexreportes.html'" class="btn">
+      <i class="fas fa-arrow-left"></i> Regresar al menú principal
+      </button>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </div>
+  
+  <!-- Modal Nueva Cita -->
+  <div class="modal-overlay" id="citaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nueva Cita</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="citaForm">
+          <div class="form-group">
+            <label for="clienteNombre">Nombre del Cliente</label>
+            <div class="autocomplete-container">
+              <input type="text" id="clienteNombre" class="form-control" placeholder="Buscar por nombre, DUI o teléfono..." autocomplete="off" required>
+              <input type="hidden" id="clienteSelected" value="">
+              <div id="clientesList" class="autocomplete-dropdown"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="clienteTelefono">Teléfono (opcional)</label>
+            <input type="tel" id="clienteTelefono" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="fechaCita">Fecha y Hora</label>
+            <input type="datetime-local" id="fechaCita" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="servicio">Servicio</label>
+            <div class="autocomplete-container">
+              <input type="text" id="servicio" class="form-control" placeholder="Buscar servicio..." autocomplete="off" required>
+              <input type="hidden" id="servicioSelected" value="">
+              <div id="serviciosList" class="autocomplete-dropdown"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="empleado">Empleado</label>
+            <div class="autocomplete-container">
+              <input type="text" id="empleado" class="form-control" placeholder="Buscar empleado..." autocomplete="off" required>
+              <input type="hidden" id="empleadoSelected" value="">
+              <div id="empleadosList" class="autocomplete-dropdown"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelarCita">Cancelar</button>
+        <button class="btn" id="guardarCita">Guardar Cita</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Eliminar Cita -->
+  <div class="modal-overlay" id="eliminarModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Eliminar Cita</h3>
+        <button class="modal-close" id="closeEliminarModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar esta cita?</p>
+        <p id="citaAEliminar"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelarEliminar">Cancelar</button>
+        <button class="btn" id="confirmarEliminar" style="background-color: #f44336;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+  <script src="citas.js"></script>
+ 
+  
+  </body>
+  </html>
+  

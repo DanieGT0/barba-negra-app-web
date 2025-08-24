@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boleta de Pago</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #333;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      background: white;
+      border: 2px solid #1a1a2e;
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-content {
+      flex: 1;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+
+    .header .subtitle {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid white;
+      object-fit: cover;
+    }
+
+    .content {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .employee-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #1a1a2e;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+    }
+
+    .info-label {
+      font-weight: bold;
+      color: #555;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .info-value {
+      font-weight: bold;
+      color: #1a1a2e;
+      font-size: 12px;
+    }
+
+    .period-section {
+      text-align: center;
+      margin: 15px 0;
+      padding: 12px;
+      background: #e3f2fd;
+      border-radius: 6px;
+      border: 1px solid #2196f3;
+    }
+
+    .period-section h3 {
+      color: #1565c0;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .period-section p {
+      color: #1976d2;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .totals-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .summary-card {
+      background: #f1f8e9;
+      border: 1px solid #8bc34a;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .summary-card h4 {
+      color: #33691e;
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .summary-card .total-number {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1b5e20;
+    }
+
+    .summary-card .total-label {
+      font-size: 10px;
+      color: #689f38;
+      margin-top: 2px;
+    }
+
+    .salary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 11px;
+    }
+
+    .salary-table th {
+      background: #1a1a2e;
+      color: white;
+      padding: 8px 6px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .salary-table td {
+      padding: 6px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .salary-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .detail-cell {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .value-cell {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .quantity-cell {
+      text-align: center;
+      color: #6c757d;
+      font-size: 10px;
+    }
+
+    .positive-value {
+      color: #28a745;
+    }
+
+    .negative-value {
+      color: #dc3545;
+    }
+
+    .total-row {
+      background: #28a745 !important;
+      color: white !important;
+    }
+
+    .total-row td {
+      font-weight: bold;
+      font-size: 12px;
+      padding: 10px 6px;
+    }
+
+    .signature-section {
+      margin-top: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .signature-box {
+      display: inline-block;
+      padding: 15px 25px;
+      border: 1px dashed #6c757d;
+      border-radius: 6px;
+      background: #f8f9fa;
+    }
+
+    .signature-label {
+      font-size: 11px;
+      color: #495057;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .signature-line {
+      width: 180px;
+      height: 1px;
+      background: #000;
+      margin: 0 auto;
+    }
+
+    .signature-text {
+      margin-top: 5px;
+      font-size: 9px;
+      color: #6c757d;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 8px;
+      background: #f8f9fa;
+      color: #6c757d;
+      font-size: 9px;
+      border-top: 1px solid #dee2e6;
+      margin-top: auto;
+    }
+
+    /* Optimización para una sola página */
+    @page {
+      size: A4;
+      margin: 8mm;
+    }
+
+    .container {
+      page-break-inside: avoid;
+      height: 100vh;
+      max-height: 100vh;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        font-size: 10px;
+      }
+      
+      .container {
+        border: 1px solid #ccc;
+        border-radius: 0;
+        height: 100vh;
+        min-height: auto;
+      }
+      
+      .header {
+        padding: 10px 15px;
+      }
+      
+      .content {
+        padding: 15px;
+      }
+      
+      .signature-section {
+        margin-top: 15px;
+      }
+      
+      .salary-table {
+        font-size: 10px;
+      }
+      
+      .salary-table th,
+      .salary-table td {
+        padding: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <img src="../imagenes/logo.jpg" alt="Logo" class="logo" onerror="this.style.display='none'">
+      <div class="header-content">
+        <h1>BOLETA DE PAGO</h1>
+        <div class="subtitle">Comprobante de Salario</div>
+      </div>
+      <div style="width: 60px;"></div> <!-- Spacer for alignment -->
+    </div>
+    
+    <div class="content">
+      <!-- Información del Empleado -->
+      <div class="employee-section">
+        <div>
+          <div class="info-item">
+            <span class="info-label">Empleado:</span>
+            <span class="info-value">{{nombre}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">DUI:</span>
+            <span class="info-value">{{dui}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-item">
+            <span class="info-label">Cargo:</span>
+            <span class="info-value">{{cargo}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Días:</span>
+            <span class="info-value">{{dias}} días</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Período -->
+      <div class="period-section">
+        <h3>Período de Pago</h3>
+        <p>{{desde}} al {{hasta}}</p>
+      </div>
+
+      <!-- Resumen de Totales -->
+      <div class="totals-summary">
+        <div class="summary-card">
+          <h4>Total Cortes</h4>
+          <div class="total-number">{{cantidad_cortes}}</div>
+          <div class="total-label">servicios realizados</div>
+        </div>
+        <div class="summary-card">
+          <h4>Total Productos</h4>
+          <div class="total-number">{{cantidad_productos}}</div>
+          <div class="total-label">productos vendidos</div>
+        </div>
+      </div>
+
+      <!-- Tabla de Salarios -->
+      <table class="salary-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Cantidad</th>
+            <th>Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="detail-cell">Salario Base Mensual</td>
+            <td class="quantity-cell">30 días</td>
+            <td class="value-cell positive-value">${{salario_base}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Salario Proporcional</td>
+            <td class="quantity-cell">{{dias}} días</td>
+            <td class="value-cell positive-value">${{salario_proporcional}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Comisión por Cortes</td>
+            <td class="quantity-cell">{{cantidad_cortes}} servicios</td>
+            <td class="value-cell positive-value">${{comision_cortes}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Comisión por Productos</td>
+            <td class="quantity-cell">{{cantidad_productos}} productos</td>
+            <td class="value-cell positive-value">${{comision_productos}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Horas Extras</td>
+            <td class="quantity-cell">{{cantidad_horas}} horas</td>
+            <td class="value-cell positive-value">${{total_horas_extras}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Días Dobles</td>
+            <td class="quantity-cell">{{cantidad_dias_dobles}} días</td>
+            <td class="value-cell positive-value">${{total_dias_dobles}}</td>
+          </tr>
+          <tr>
+            <td class="detail-cell">Descuentos Aplicados</td>
+            <td class="quantity-cell">-</td>
+            <td class="value-cell negative-value">-${{total_descuentos}}</td>
+          </tr>
+          <tr class="total-row">
+            <td><strong>TOTAL A PAGAR</strong></td>
+            <td></td>
+            <td><strong>${{total_pago}}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Firma -->
+      <div class="signature-section">
+        <div class="signature-box">
+          <div class="signature-label">Firma del Empleado</div>
+          <div class="signature-line"></div>
+          <div class="signature-text">Acepto haber recibido el monto indicado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Documento generado automáticamente - Barbería System
+    </div>
+  </div>
+</body>
+</html>

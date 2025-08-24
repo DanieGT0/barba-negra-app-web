@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD Empleados</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="toggle-form-container">
+      <button id="toggleFormBtn" class="btn-toggle">
+        <span>Mostrar/Ocultar Formulario</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+
+    <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+
+    <!-- Formulario -->
+    <div id="formSection" class="card glass hidden">
+      <h1>Registro de Empleados</h1>
+      <form id="empleadoForm">
+        <input type="hidden" id="accion" name="accion" value="crear">
+        <input type="hidden" id="empleado_id" name="empleado_id">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fecha">Fecha de Registro</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+
+          <div class="form-group">
+            <label for="dui">DUI</label>
+            <input type="text" id="dui" name="dui" required placeholder="00000000-0" />
+          </div>
+
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" required />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" name="direccion" required />
+          </div>
+
+          <div class="form-group">
+            <label for="correo">Correo Electrónico</label>
+            <input type="email" id="correo" name="correo" required />
+          </div>
+
+          <div class="form-group">
+            <label for="nacimiento">Fecha de Nacimiento</label>
+            <input type="date" id="nacimiento" name="nacimiento" required />
+          </div>
+
+          <div class="form-group">
+            <label for="salario">Salario</label>
+            <input type="number" step="0.01" id="salario" name="salario" required />
+          </div>
+
+          <div class="form-group">
+            <label for="cargo">Cargo</label>
+            <select id="cargo" name="cargo" required>
+              <option value="">Seleccione...</option>
+              <option value="Encargad@ de tienda">Encarg@ de tienda</option>
+              <option value="Barbero 1">Barbero 1</option>
+              <option value="Barbero 2">Barbero 2</option>
+              <option value="Barbero 3">Barbero 3</option>
+              <option value="Barbero 4">Barbero 4</option>
+              <option value="Barbero 5">Barbero 5</option>
+              <option value="Barbero 6">Barbero 6</option>
+              <option value="Barbero 7">Barbero 7</option>
+              <option value="Barbero 8">Barbero 8</option>
+              <option value="Barbero 9">Barbero 9</option>
+              <option value="Barbero 10">Barbero 10</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" name="telefono" placeholder="7777-8888" required />
+          </div>
+        </div>
+
+        <div class="buttons-container">
+          <button type="submit" id="submitBtn" class="btn-primary">Registrar Empleado</button>
+          <button type="button" id="cancelBtn" class="btn-secondary" style="display: none;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabla de empleados -->
+    <div class="card glass mt-4">
+      <h2>Listado de Empleados</h2>
+
+      <div class="search-container">
+        <input type="text" id="searchDui" placeholder="Buscar por DUI">
+        <input type="text" id="searchNombre" placeholder="Buscar por Nombre">
+        <input type="date" id="fechaDesde" placeholder="Desde">
+        <input type="date" id="fechaHasta" placeholder="Hasta">
+        <button id="searchBtn" class="btn-search"><i class="fas fa-search"></i></button>
+        <button id="clearFiltersBtn" class="btn-search"><i class="fas fa-times"></i></button>
+        <button id="downloadExcelBtn" class="btn-search">
+          <i class="fas fa-file-excel"></i> Descargar Excel
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table id="empleadosTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>DUI</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Correo</th>
+              <th>Nacimiento</th>
+              <th>Salario</th>
+              <th>Cargo</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="empleados.js"></script>
+</body>
+</html>

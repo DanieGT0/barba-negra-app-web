@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Principal - Barba Negra</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="indexstyles.css" />
+
+  <!-- Chart.js y otras librerías -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <!-- Encabezado -->
+  <div class="container">
+    <header>
+      <div class="logo">
+        <!--  ✅ Nuevo logo  -->
+        <img src="imagenes/logo1.png" alt="Logo Barba Negra" class="logo-img" />
+      </div>
+      <div>
+        <button onclick="cerrarSesion()" class="btn-logout">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+      </div>
+      <div class="date-time" id="dateTime"></div>
+    </header>
+  </div>
+
+  <!-- Contenedor principal con dos columnas -->
+  <div class="layout-principal">
+    <!-- Panel izquierdo: accesos -->
+    <div class="dashboard-container">
+      <div class="menu-glass-container">
+        <div class="menu-title">
+          <i class="fas fa-th-list"></i> Menú Principal
+        </div>
+        <div class="dashboard">
+          <div class="card-option" id="clientes" onclick="location.href='/clientes'">
+            <i class="fas fa-users"></i>
+            <h3>Clientes</h3>
+          </div>
+          <div class="card-option" id="empleados" onclick="location.href='/empleados'">
+            <i class="fas fa-user-tie"></i>
+            <h3>Empleados</h3>
+          </div>
+          <div class="card-option" id="facturacion" onclick="location.href='/facturacion'">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <h3>Ventas</h3>
+          </div>
+
+          <div class="card-option" id="detallecortes" onclick="location.href='/detalle_cortes.html'">
+            <i class="fas fa-scissors"></i>
+            <h3>Resumen de cortes</h3>
+          </div>
+          <div class="card-option" id="detalleproductos" onclick="location.href='/detalle_productos.html'">
+            <i class="fas fa-box-open"></i>
+            <h3>Resumen de productos</h3>
+          </div>
+          <div class="card-option" id="inventarios" onclick="location.href='/inventarios'">
+            <i class="fas fa-boxes"></i>
+            <h3>Inventarios</h3>
+          </div>
+          
+          <div class="card-option" id="citas" onclick="location.href='/citas'">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>Agendar Citas</h3>
+          </div>
+          <div class="card-option" id="cierrecaja" onclick="location.href='/cierre/cierre.html'">
+            <i class="fas fa-cash-register"></i>
+            <h3>Cierre Caja</h3>
+          </div>
+          
+          <div class="card-option" id="cortes" onclick="location.href='/cortes'">
+            <i class="fas fa-cut"></i>
+            <h3>Cortes</h3>
+          </div>
+
+          <div class="card-option" id="gastos" onclick="location.href='/gastos'">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <h3>Gastos</h3>
+          </div>
+          
+          <div class="card-option" id="compras" onclick="location.href='/compras'">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Compras</h3>
+          </div>
+          
+          <div class="card-option" id="salarios" onclick="location.href='/salarios/salarios.html'">
+            <i class="fas fa-cash-register"></i>
+            <h3>Salarios</h3>
+          </div>
+
+          <!-- Módulo de nómina eliminado -->
+
+          <div class="card-option" id="tarjetas-fidelidad" onclick="location.href='/tarjetas-fidelidad/tarjetas.html'">
+            <i class="fas fa-credit-card"></i>
+            <h3>Tarjetas de Fidelidad</h3>
+          </div>
+          
+        <div class="card-option" id="registrar" onclick="location.href='./register.html'">
+  <i class="fas fa-user-plus"></i>
+  <h3>Registrar Usuario</h3>
+</div>
+          <div class="card-option" id="usuarios" onclick="location.href='/usuarios'">
+            <i class="fa-solid fa-users"></i>
+            <h3>Usuarios</h3>
+          </div>
+          <div class="card-option" id="comisiones" onclick="location.href='/facturacion/comisiones.html'">
+            <i class="fa-solid fa-users"></i>
+            <h3>Comisiones</h3>
+          </div>
+          
+        
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: reportes -->
+    <div class="main-container">
+      <!-- Nueva tarjeta de Membresías -->
+      <div class="reporte-card">
+        <h2>
+          <i class="fas fa-id-card"></i>
+          Reporte de Membresías
+          <span class="sucursal-escalon">(Sucursal Escalón)</span>
+        </h2>
+
+        <div class="controles">
+          <div class="control-grupo">
+            <label for="selectMesMembresias">Mes:</label>
+            <select id="selectMesMembresias">
+              <option value="Enero">Enero</option><option value="Febrero">Febrero</option>
+              <option value="Marzo">Marzo</option><option value="Abril">Abril</option>
+              <option value="Mayo">Mayo</option><option value="Junio">Junio</option>
+              <option value="Julio">Julio</option><option value="Agosto">Agosto</option>
+              <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option>
+              <option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
+            </select>
+          </div>
+          <div class="control-grupo">
+            <label for="inputAnioMembresias">Año:</label>
+            <input type="number" id="inputAnioMembresias" min="2020" max="2030" />
+          </div>
+          <div class="control-grupo">
+            <label>&nbsp;</label>
+            <button id="btnCargarMembresias"><i class="fas fa-sync-alt"></i> Actualizar Datos</button>
+          </div>
+        </div>
+
+        <div class="resumen-datos">
+          <div class="dato-card">
+            <div class="dato-titulo">Membresías Activas</div>
+            <div class="dato-valor dato-activo" id="valorActivas">0</div>
+            <div class="dato-porcentaje"><i class="fas fa-check-circle dato-icon"></i> Activas</div>
+          </div>
+          <div class="dato-card">
+            <div class="dato-titulo">Nuevas Membresías</div>
+            <div class="dato-valor dato-nuevas" id="valorNuevas">0</div>
+            <div class="dato-porcentaje"><i class="fas fa-plus-circle dato-icon"></i> Nuevas</div>
+          </div>
+          <div class="dato-card">
+            <div class="dato-titulo">Ingresos por Membresías</div>
+            <div class="dato-valor dato-ingresos" id="valorIngresos">$0.00</div>
+            <div class="dato-porcentaje"><i class="fas fa-dollar-sign dato-icon"></i> Total</div>
+          </div>
+          <div class="dato-card">
+            <div class="dato-titulo">Próximas a Vencer</div>
+            <div class="dato-valor dato-vencimiento" id="valorVencimiento">0</div>
+            <div class="dato-porcentaje"><i class="fas fa-exclamation-triangle dato-icon"></i> 7 días</div>
+          </div>
+        </div>
+
+        <div class="controles">
+          <div class="control-grupo">
+            <label for="tipoGraficoMembresias">Tipo de Gráfico:</label>
+            <select id="tipoGraficoMembresias">
+              <option value="doughnut">Donas</option>
+              <option value="pie">Circular</option>
+              <option value="bar">Barras</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grafico-container">
+          <canvas id="chartMembresias"></canvas>
+        </div>
+
+      </div>
+
+      <!-- Tarjeta original de Ventas vs Metas -->
+      <div class="reporte-card">
+        <h2>
+          <i class="fas fa-chart-line"></i>
+          Reporte de Ventas vs Metas
+          <span class="sucursal-escalon">(Sucursal Escalón)</span>
+        </h2>
+
+        <div class="controles">
+          <div class="control-grupo">
+            <label for="selectMes">Mes:</label>
+            <select id="selectMes">
+              <option value="Enero">Enero</option><option value="Febrero">Febrero</option>
+              <option value="Marzo">Marzo</option><option value="Abril">Abril</option>
+              <option value="Mayo">Mayo</option><option value="Junio">Junio</option>
+              <option value="Julio">Julio</option><option value="Agosto">Agosto</option>
+              <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option>
+              <option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
+            </select>
+          </div>
+          <div class="control-grupo"><label for="inputAnio">Año:</label><input type="number" id="inputAnio" min="2020" max="2030" /></div>
+          <div class="control-grupo"><label for="inputMeta">Meta Mensual ($):</label><input type="number" id="inputMeta" placeholder="5000" /></div>
+          <div class="control-grupo"><label>&nbsp;</label><button id="btnGuardarMeta"><i class="fas fa-save"></i> Guardar Meta</button></div>
+          <div class="control-grupo"><label>&nbsp;</label><button id="btnCargarDatos"><i class="fas fa-sync-alt"></i> Actualizar Datos</button></div>
+        </div>
+
+        <div class="resumen-datos">
+          <div class="dato-card"><div class="dato-titulo">Meta Mensual</div><div class="dato-valor dato-meta" id="valorMeta">$0.00</div><div class="dato-porcentaje"><i class="fas fa-bullseye dato-icon"></i> Objetivo</div></div>
+          <div class="dato-card"><div class="dato-titulo">Ventas Realizadas</div><div class="dato-valor dato-ventas" id="valorVentas">$0.00</div><div class="dato-porcentaje"><i class="fas fa-cash-register dato-icon"></i> Real</div></div>
+          <div class="dato-card"><div class="dato-titulo">Porcentaje Logrado</div><div class="dato-valor" id="valorPorcentaje">0%</div><div class="progreso-container"><div class="progreso-barra" id="progresoMeta" style="width: 0%"></div></div></div>
+          <div class="dato-card"><div class="dato-titulo">Estado</div><div class="dato-valor"><span class="badge" id="estadoMeta">Pendiente</span></div><div class="dato-porcentaje" id="faltanteMeta"><i class="fas fa-info-circle dato-icon"></i> Calculando...</div></div>
+        </div>
+
+        <div class="graficos">
+          <div class="grafico-header"><label for="tipoGrafico">Tipo de gráfico:</label>
+            <select id="tipoGrafico">
+              <option value="bar">Barras</option>
+              <option value="pie">Pastel</option>
+              <option value="doughnut" selected>Dona</option>
+            </select>
+          </div>
+          <div class="grafico-container"><canvas id="chartVentasMetas"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: 2rem; font-size: 0.8rem; color: rgba(241,241,241,0.6);">© 2025 Barba Negra</footer>
+
+  <script>
+    function cerrarSesion() {
+      Swal.fire({
+        title: '¿Deseas cerrar sesión?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/logout';
+        }
+      });
+    }
+
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateStr = now.toLocaleDateString('es-ES', options);
+      const timeStr = now.toLocaleTimeString('es-ES');
+      document.getElementById('dateTime').textContent = `${dateStr} | ${timeStr}`;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Control de acceso según módulos permitidos
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/session')
+        .then(res => res.json())
+        .then(data => {
+          if (data.rol === 'Admin') return;
+          const permitidos = data.modulos;
+          const modulos = {
+            clientes: 'Clientes', empleados: 'Empleados', inventarios: 'Inventarios',
+            compras: 'Compras', cortes: 'Cortes', facturacion: 'Facturacion', 
+            detallecortes: 'DetalleCortes', detalleproductos: 'DetalleProductos',
+            citas: 'AgendarCitas', usuarios: 'Usuarios',salarios: 'Salarios',gastos: 'Gastos',cierrecaja: 'CierreCaja', registrar: 'Registrar', comisiones: 'Comisiones', 'tarjetas-fidelidad': 'TarjetasFidelidad',
+          };
+          for (let id in modulos) {
+            if (!permitidos.includes(modulos[id])) {
+              const card = document.getElementById(id);
+              if (card) card.style.display = 'none';
+            }
+          }
+        })
+        .catch(() => window.location.href = '/login');
+    });
+  </script>
+
+  <script src="indexjs.js"></script>
+  <script src="chart-ventas.js"></script>
+  <script src="chart-membresias.js"></script>
+</body>
+</html>

@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo de Salarios - Barbería System</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(159, 216, 26, 0.15), rgba(40, 167, 69, 0.1));
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(159, 216, 26, 0.3);
+    }
+
+    .header h1 {
+      color: #f1f1f1;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.8rem;
+    }
+
+    .header h1 i {
+      color: #9fd81a;
+    }
+
+    .filters-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 20px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      color: #f1f1f1;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group label i {
+      color: #9fd81a;
+    }
+
+    .form-group input, .form-group select {
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #9fd81a;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-pdf {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #9fd81a, #7cb015);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #8bc415, #6a9612);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: #fff;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      color: #000;
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      min-width: auto;
+    }
+
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #9fd81a, #7cb015);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(241, 241, 241, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .table-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 25px;
+    }
+
+    .table-container {
+      width: 100%;
+      max-height: 60vh;
+      overflow: auto;
+      border: 2px solid rgba(159, 216, 26, 0.3);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      margin-top: 20px;
+    }
+
+    .salary-table {
+      width: 100%;
+      min-width: 1200px;
+      border-collapse: collapse;
+      background: transparent;
+    }
+
+    .salary-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(159, 216, 26, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .salary-table th {
+      background: rgba(159, 216, 26, 0.15);
+      color: #9fd81a;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px 12px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(159, 216, 26, 0.2);
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+
+    .salary-table td {
+      padding: 15px 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      background: transparent !important;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      color: #f1f1f1;
+    }
+
+    .salary-table tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .salary-table tbody tr:hover {
+      background-color: rgba(159, 216, 26, 0.1) !important;
+    }
+
+    .employee-name {
+      font-weight: bold;
+      color: #f1f1f1;
+    }
+
+    .dui-code {
+      font-family: monospace;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .money-positive {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .money-negative {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .money-total {
+      color: #9fd81a;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .loading-state i {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #9fd81a;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: #9fd81a;
+      opacity: 0.6;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .notification.warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      color: #000;
+    }
+
+    /* Panel de Gestión Mejorado */
+    .management-panel {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 0;
+      border: 1px solid rgba(159, 216, 26, 0.3);
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, rgba(159, 216, 26, 0.15), rgba(40, 167, 69, 0.1));
+      padding: 25px 30px;
+      border-bottom: 2px solid rgba(159, 216, 26, 0.3);
+    }
+
+    .panel-header h3 {
+      color: #f1f1f1;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .panel-header h3 i {
+      color: #9fd81a;
+      background: rgba(159, 216, 26, 0.2);
+      padding: 12px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+    }
+
+    .panel-header p {
+      color: rgba(241, 241, 241, 0.8);
+      margin: 0;
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    .panel-content {
+      padding: 30px;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .form-section h4 {
+      color: #f1f1f1;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .form-section h4 i {
+      color: #9fd81a;
+    }
+
+    .management-form {
+      margin: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      align-items: end;
+    }
+
+    .btn-large {
+      padding: 15px 25px;
+      font-size: 1rem;
+      font-weight: 700;
+      min-width: 200px;
+      border-radius: 10px;
+    }
+
+    .table-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-section h4 {
+      color: #f1f1f1;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .table-section h4 i {
+      color: #9fd81a;
+    }
+
+    .table-container-small {
+      width: 100%;
+      max-height: 40vh;
+      overflow: auto;
+      border: 2px solid rgba(159, 216, 26, 0.3);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .management-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+    }
+
+    .management-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(159, 216, 26, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .management-table th {
+      background: rgba(159, 216, 26, 0.15);
+      color: #9fd81a;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px 12px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(159, 216, 26, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+
+    .management-table td {
+      padding: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #f1f1f1;
+      background: transparent !important;
+    }
+
+    .management-table tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .management-table tbody tr:hover {
+      background-color: rgba(159, 216, 26, 0.1) !important;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: #fff;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(135deg, #c82333, #bd2130);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: #f1f1f1;
+      font-size: 1.3em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title i {
+      color: #9fd81a;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .salary-table {
+        min-width: 800px;
+      }
+
+      .management-tabs {
+        flex-wrap: wrap;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <i class="fas fa-money-bill-wave"></i>
+        Módulo de Salarios
+      </h1>
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div class="filters-section">
+      <div class="filters-grid">
+        <!-- Filtro fecha desde -->
+        <div class="form-group">
+          <label>
+            <i class="fas fa-calendar-plus"></i>
+            Fecha desde:
+          </label>
+          <input type="date" id="fechaDesde">
+        </div>
+        
+        <!-- Filtro fecha hasta -->
+        <div class="form-group">
+          <label>
+            <i class="fas fa-calendar-minus"></i>
+            Fecha hasta:
+          </label>
+          <input type="date" id="fechaHasta">
+        </div>
+        
+        <!-- Botón calcular -->
+        <div class="form-group">
+          <button onclick="calcularSalarios()" class="btn-primary" id="btnCalcular">
+            <i class="fas fa-calculator"></i> Calcular
+          </button>
+        </div>
+        
+        <!-- Botón exportar -->
+        <div class="form-group">
+          <button onclick="exportarExcel()" class="btn-success" id="btnExportar">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-section" id="statsContainer" style="display: none;">
+      <div class="stat-card">
+        <div class="stat-value" id="totalEmpleados">0</div>
+        <div class="stat-label">Empleados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalSalarios">$0.00</div>
+        <div class="stat-label">Salarios Base</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalComisiones">$0.00</div>
+        <div class="stat-label">Comisiones</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalExtras">$0.00</div>
+        <div class="stat-label">Extras + Dobles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalDescuentos">$0.00</div>
+        <div class="stat-label">Descuentos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalNeto">$0.00</div>
+        <div class="stat-label">Total Neto</div>
+      </div>
+    </div>
+
+    <!-- Tabla de Salarios -->
+    <div class="table-section">
+      <div class="section-title">
+        <i class="fas fa-table"></i>
+        <span>Resumen de Salarios por Período</span>
+        <span id="contadorRegistros" style="margin-left: auto; font-size: 0.9em; color: #9fd81a;">0 empleados</span>
+      </div>
+      
+      <div class="table-container">
+        <table id="tablaSalarios" class="salary-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-id-card"></i> DUI</th>
+              <th><i class="fas fa-user"></i> Empleado</th>
+              <th><i class="fas fa-briefcase"></i> Cargo</th>
+              <th><i class="fas fa-calendar-days"></i> Días</th>
+              <th><i class="fas fa-dollar-sign"></i> Salario Base</th>
+              <th><i class="fas fa-cut"></i> Com. Cortes</th>
+              <th><i class="fas fa-shopping-bag"></i> Com. Productos</th>
+              <th><i class="fas fa-clock"></i> Horas Extras</th>
+              <th><i class="fas fa-calendar-star"></i> Días Dobles</th>
+              <th><i class="fas fa-minus-circle"></i> Descuentos</th>
+              <th><i class="fas fa-money-bill"></i> Total Neto</th>
+              <th><i class="fas fa-file-pdf"></i> Boleta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="12" class="empty-state">
+                <i class="fas fa-calendar-check"></i><br>
+                <strong>Selecciona un período de fechas</strong><br>
+                <small>Usa los campos de fecha arriba y haz clic en "Calcular"</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel de Horas Extras -->
+    <div class="management-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-clock"></i> Gestión de Horas Extras</h3>
+        <p>Registra y gestiona las horas adicionales trabajadas por los empleados</p>
+      </div>
+          
+      <div class="panel-content">
+        <div class="form-section">
+          <h4><i class="fas fa-plus-circle"></i> Registrar Nuevas Horas Extras</h4>
+          <form onsubmit="registrarHorasExtras(event)" class="management-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Fecha:</label>
+                <input type="date" id="fechaHorasExtras" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Empleado:</label>
+                <select id="empleadoHorasExtras" required>
+                  <option value="">Seleccione empleado...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-clock"></i> Horas:</label>
+                <input type="number" id="horasExtras" min="0.5" step="0.5" placeholder="Ej: 2.5" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Pago por Hora:</label>
+                <input type="number" id="pagoHoraExtra" min="0.01" step="0.01" placeholder="Ej: 5.00" required>
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn-primary btn-large">
+                  <i class="fas fa-save"></i> Registrar Horas Extras
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-section">
+          <h4><i class="fas fa-list"></i> Horas Extras Registradas</h4>
+          <div class="table-container-small">
+            <table id="tablaHorasExtras" class="management-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Empleado</th>
+                  <th>Horas</th>
+                  <th>Pago/Hora</th>
+                  <th>Total</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" class="empty-state">No hay horas extras registradas</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de Días Dobles -->
+    <div class="management-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-calendar-star"></i> Gestión de Días Dobles</h3>
+        <p>Registra días festivos y feriados trabajados con pago doble</p>
+      </div>
+      <div class="panel-content">
+        <div class="form-section">
+          <h4><i class="fas fa-plus-circle"></i> Registrar Nuevo Día Doble</h4>
+          <form onsubmit="registrarDiaDoble(event)" class="management-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Fecha:</label>
+                <input type="date" id="fechaDiaDoble" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Empleado:</label>
+                <select id="empleadoDiaDoble" required>
+                  <option value="">Seleccione empleado...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-comment"></i> Motivo:</label>
+                <input type="text" id="motivoDiaDoble" placeholder="Ej: Día festivo, Feriado nacional" required>
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn-primary btn-large">
+                  <i class="fas fa-save"></i> Registrar Día Doble
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-section">
+          <h4><i class="fas fa-list"></i> Días Dobles Registrados</h4>
+          <div class="table-container-small">
+            <table id="tablaDiasDobles" class="management-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Empleado</th>
+                  <th>Motivo</th>
+                  <th>Pago Día</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="empty-state">No hay días dobles registrados</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de Descuentos -->
+    <div class="management-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-minus-circle"></i> Gestión de Descuentos</h3>
+        <p>Registra descuentos, adelantos de salario y deducciones</p>
+      </div>
+      <div class="panel-content">
+        <div class="form-section">
+          <h4><i class="fas fa-plus-circle"></i> Registrar Nuevo Descuento</h4>
+          <form onsubmit="registrarDescuento(event)" class="management-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Fecha:</label>
+                <input type="date" id="fechaDescuento" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Empleado:</label>
+                <select id="empleadoDescuento" required>
+                  <option value="">Seleccione empleado...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-dollar-sign"></i> Monto:</label>
+                <input type="number" id="montoDescuento" min="0.01" step="0.01" placeholder="Ej: 25.00" required>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-comment"></i> Motivo:</label>
+                <input type="text" id="motivoDescuento" placeholder="Ej: Adelanto de salario, Préstamo" required>
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn-primary btn-large">
+                  <i class="fas fa-save"></i> Registrar Descuento
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-section">
+          <h4><i class="fas fa-list"></i> Descuentos Registrados</h4>
+          <div class="table-container-small">
+            <table id="tablaDescuentos" class="management-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Empleado</th>
+                  <th>Monto</th>
+                  <th>Motivo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="empty-state">No hay descuentos registrados</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    let salariosDatos = [];
+
+    // ===================================================
+    // INICIALIZACIÓN
+    // ===================================================
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('💼 Iniciando módulo de salarios...');
+      inicializarFechas();
+      cargarEmpleados();
+      cargarRegistrosExistentes();
+    });
+
+    function inicializarFechas() {
+      const hoy = new Date();
+      const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      
+      document.getElementById('fechaDesde').value = primerDiaMes.toISOString().split('T')[0];
+      document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
+      
+      // Inicializar fechas de formularios
+      document.getElementById('fechaHorasExtras').value = hoy.toISOString().split('T')[0];
+      document.getElementById('fechaDiaDoble').value = hoy.toISOString().split('T')[0];
+      document.getElementById('fechaDescuento').value = hoy.toISOString().split('T')[0];
+    }
+
+    // ===================================================
+    // GESTIÓN DE EMPLEADOS
+    // ===================================================
+    
+    async function cargarEmpleados() {
+      try {
+        const response = await fetch('/api/empleados');
+        const empleados = await response.json();
+        
+        const selects = [
+          'empleadoHorasExtras',
+          'empleadoDiaDoble', 
+          'empleadoDescuento'
+        ];
+        
+        selects.forEach(selectId => {
+          const select = document.getElementById(selectId);
+          select.innerHTML = '<option value="">Seleccione empleado...</option>';
+          
+          empleados.forEach(empleado => {
+            const option = document.createElement('option');
+            option.value = empleado.dui;
+            option.textContent = `${empleado.nombre} (${empleado.dui})`;
+            select.appendChild(option);
+          });
+        });
+        
+      } catch (error) {
+        console.error('Error cargando empleados:', error);
+      }
+    }
+
+    // ===================================================
+    // GESTIÓN DE TABS
+    // ===================================================
+    
+    function showTab(tabName) {
+      // Ocultar todos los tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Desactivar todos los botones
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Mostrar tab seleccionado
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      // Activar botón correspondiente
+      event.target.classList.add('active');
+      
+      // Cargar datos del tab si es necesario
+      if (tabName !== 'salarios') {
+        cargarDatosTab(tabName);
+      }
+    }
+
+    async function cargarDatosTab(tabName) {
+      try {
+        switch (tabName) {
+          case 'horas-extras':
+            await cargarHorasExtras();
+            break;
+          case 'dias-dobles':
+            await cargarDiasDobles();
+            break;
+          case 'descuentos':
+            await cargarDescuentos();
+            break;
+        }
+      } catch (error) {
+        console.error(`Error cargando ${tabName}:`, error);
+      }
+    }
+
+    async function cargarRegistrosExistentes() {
+      await cargarHorasExtras();
+      await cargarDiasDobles();
+      await cargarDescuentos();
+    }
+
+    // ===================================================
+    // GESTIÓN DE HORAS EXTRAS
+    // ===================================================
+    
+    async function registrarHorasExtras(event) {
+      event.preventDefault();
+      
+      const data = {
+        dui: document.getElementById('empleadoHorasExtras').value,
+        fecha: document.getElementById('fechaHorasExtras').value,
+        horas: parseFloat(document.getElementById('horasExtras').value),
+        pago_hora: parseFloat(document.getElementById('pagoHoraExtra').value),
+        total: parseFloat(document.getElementById('horasExtras').value) * parseFloat(document.getElementById('pagoHoraExtra').value)
+      };
+      
+      try {
+        const response = await fetch('/api/horas-extras', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Horas extras registradas correctamente');
+          event.target.reset();
+          document.getElementById('fechaHorasExtras').value = new Date().toISOString().split('T')[0];
+          await cargarHorasExtras();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al registrar horas extras');
+      }
+    }
+
+    async function cargarHorasExtras() {
+      try {
+        const response = await fetch('/api/horas-extras');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const horasExtras = await response.json();
+        
+        const tbody = document.querySelector('#tablaHorasExtras tbody');
+        tbody.innerHTML = '';
+        
+        if (!Array.isArray(horasExtras)) {
+          console.error('Las horas extras no son un array:', horasExtras);
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Error: Datos inválidos del servidor</td></tr>';
+          return;
+        }
+        
+        if (horasExtras.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay horas extras registradas</td></tr>';
+          return;
+        }
+        
+        horasExtras.forEach(hora => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${hora.fecha}</td>
+            <td>${hora.nombre_empleado || hora.dui}</td>
+            <td>${hora.horas}</td>
+            <td>$${parseFloat(hora.pago_hora).toFixed(2)}</td>
+            <td class="money-positive">$${parseFloat(hora.total).toFixed(2)}</td>
+            <td>
+              <button onclick="eliminarHorasExtras(${hora.id})" class="btn-delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+      } catch (error) {
+        console.error('Error cargando horas extras:', error);
+        const tbody = document.querySelector('#tablaHorasExtras tbody');
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Error al cargar horas extras</td></tr>';
+        mostrarNotificacion('error', `Error cargando horas extras: ${error.message}`);
+      }
+    }
+
+    async function eliminarHorasExtras(id) {
+      if (!confirm('¿Está seguro de eliminar este registro de horas extras?')) return;
+      
+      try {
+        const response = await fetch(`/api/horas-extras/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Horas extras eliminadas correctamente');
+          await cargarHorasExtras();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al eliminar horas extras');
+      }
+    }
+
+    // ===================================================
+    // GESTIÓN DE DÍAS DOBLES
+    // ===================================================
+    
+    async function registrarDiaDoble(event) {
+      event.preventDefault();
+      
+      const data = {
+        dui: document.getElementById('empleadoDiaDoble').value,
+        fecha: document.getElementById('fechaDiaDoble').value,
+        motivo: document.getElementById('motivoDiaDoble').value
+      };
+      
+      try {
+        const response = await fetch('/api/dias-dobles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Día doble registrado correctamente');
+          event.target.reset();
+          document.getElementById('fechaDiaDoble').value = new Date().toISOString().split('T')[0];
+          await cargarDiasDobles();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al registrar día doble');
+      }
+    }
+
+    async function cargarDiasDobles() {
+      try {
+        const response = await fetch('/api/dias-dobles');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const diasDobles = await response.json();
+        
+        const tbody = document.querySelector('#tablaDiasDobles tbody');
+        tbody.innerHTML = '';
+        
+        if (!Array.isArray(diasDobles)) {
+          console.error('Los días dobles no son un array:', diasDobles);
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error: Datos inválidos del servidor</td></tr>';
+          return;
+        }
+        
+        if (diasDobles.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay días dobles registrados</td></tr>';
+          return;
+        }
+        
+        diasDobles.forEach(dia => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${dia.fecha}</td>
+            <td>${dia.nombre_empleado || dia.dui}</td>
+            <td>${dia.motivo}</td>
+            <td class="money-positive">$${dia.pago_dia ? parseFloat(dia.pago_dia).toFixed(2) : 'Calculado'}</td>
+            <td>
+              <button onclick="eliminarDiaDoble(${dia.id})" class="btn-delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+      } catch (error) {
+        console.error('Error cargando días dobles:', error);
+        const tbody = document.querySelector('#tablaDiasDobles tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error al cargar días dobles</td></tr>';
+        mostrarNotificacion('error', `Error cargando días dobles: ${error.message}`);
+      }
+    }
+
+    async function eliminarDiaDoble(id) {
+      if (!confirm('¿Está seguro de eliminar este registro de día doble?')) return;
+      
+      try {
+        const response = await fetch(`/api/dias-dobles/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Día doble eliminado correctamente');
+          await cargarDiasDobles();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al eliminar día doble');
+      }
+    }
+
+    // ===================================================
+    // GESTIÓN DE DESCUENTOS
+    // ===================================================
+    
+    async function registrarDescuento(event) {
+      event.preventDefault();
+      
+      const data = {
+        dui: document.getElementById('empleadoDescuento').value,
+        fecha: document.getElementById('fechaDescuento').value,
+        monto: parseFloat(document.getElementById('montoDescuento').value),
+        motivo: document.getElementById('motivoDescuento').value
+      };
+      
+      try {
+        const response = await fetch('/api/descuentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Descuento registrado correctamente');
+          event.target.reset();
+          document.getElementById('fechaDescuento').value = new Date().toISOString().split('T')[0];
+          await cargarDescuentos();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al registrar descuento');
+      }
+    }
+
+    async function cargarDescuentos() {
+      try {
+        const response = await fetch('/api/descuentos');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const descuentos = await response.json();
+        
+        console.log('Descuentos recibidos:', descuentos);
+        
+        const tbody = document.querySelector('#tablaDescuentos tbody');
+        tbody.innerHTML = '';
+        
+        // Verificar si es un array válido
+        if (!Array.isArray(descuentos)) {
+          console.error('Los descuentos no son un array:', descuentos);
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error: Datos inválidos del servidor</td></tr>';
+          return;
+        }
+        
+        if (descuentos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay descuentos registrados</td></tr>';
+          return;
+        }
+        
+        descuentos.forEach(descuento => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${descuento.fecha}</td>
+            <td>${descuento.nombre_empleado || descuento.dui}</td>
+            <td class="money-negative">$${parseFloat(descuento.monto).toFixed(2)}</td>
+            <td>${descuento.motivo}</td>
+            <td>
+              <button onclick="eliminarDescuento(${descuento.id})" class="btn-delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+      } catch (error) {
+        console.error('Error cargando descuentos:', error);
+        const tbody = document.querySelector('#tablaDescuentos tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error al cargar descuentos</td></tr>';
+        mostrarNotificacion('error', `Error cargando descuentos: ${error.message}`);
+      }
+    }
+
+    async function eliminarDescuento(id) {
+      if (!confirm('¿Está seguro de eliminar este descuento?')) return;
+      
+      try {
+        const response = await fetch(`/api/descuentos/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        
+        if (response.ok) {
+          mostrarNotificacion('success', 'Descuento eliminado correctamente');
+          await cargarDescuentos();
+        } else {
+          mostrarNotificacion('error', result.mensaje);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('error', 'Error al eliminar descuento');
+      }
+    }
+
+    // ===================================================
+    // FUNCIÓN PRINCIPAL DE CÁLCULO
+    // ===================================================
+    
+    async function calcularSalarios() {
+      console.log('💰 Calculando salarios...');
+      
+      const fechaDesde = document.getElementById('fechaDesde').value;
+      const fechaHasta = document.getElementById('fechaHasta').value;
+      
+      if (!fechaDesde || !fechaHasta) {
+        mostrarNotificacion('warning', 'Por favor selecciona ambas fechas');
+        return;
+      }
+
+      if (new Date(fechaDesde) > new Date(fechaHasta)) {
+        mostrarNotificacion('warning', 'La fecha desde no puede ser mayor que la fecha hasta');
+        return;
+      }
+
+      bloquearBoton('btnCalcular', 'Calculando...');
+      mostrarEstadoCarga();
+
+      try {
+        const url = `/api/salarios-nuevo?desde=${fechaDesde}&hasta=${fechaHasta}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.mensaje || 'Error desconocido');
+        }
+
+        salariosDatos = data.salarios;
+        mostrarSalarios(salariosDatos);
+        actualizarEstadisticas(salariosDatos);
+        
+        mostrarNotificacion('success', `✅ ${salariosDatos.length} salarios calculados correctamente`);
+
+      } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarEstadoError(error.message);
+        mostrarNotificacion('error', `Error: ${error.message}`);
+      } finally {
+        desbloquearBoton('btnCalcular', '<i class="fas fa-calculator"></i> Calcular');
+      }
+    }
+
+    // ===================================================
+    // MOSTRAR DATOS EN TABLA
+    // ===================================================
+    
+    function mostrarSalarios(salarios) {
+      const tbody = document.querySelector('#tablaSalarios tbody');
+      tbody.innerHTML = '';
+
+      if (!salarios || salarios.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="12" class="empty-state">
+              <i class="fas fa-users-slash"></i><br>
+              <strong>No hay empleados para el período seleccionado</strong>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      salarios.forEach(empleado => {
+        const fila = document.createElement('tr');
+        
+        const salarioBase = parseFloat(empleado.salario_base || 0);
+        const comisionCortes = parseFloat(empleado.comision_servicios || 0);
+        const comisionProductos = parseFloat(empleado.comision_productos || 0);
+        const horasExtras = parseFloat(empleado.total_horas_extras || 0);
+        const diasDobles = parseFloat(empleado.total_dias_dobles || 0);
+        const descuentos = parseFloat(empleado.total_descuentos || 0);
+        const totalNeto = parseFloat(empleado.total_neto || 0);
+        const diasTrabajados = parseInt(empleado.dias_trabajados || 0);
+
+        fila.innerHTML = `
+          <td><span class="dui-code">${empleado.dui}</span></td>
+          <td><span class="employee-name">${empleado.nombre}</span></td>
+          <td>${empleado.cargo || 'N/A'}</td>
+          <td>${diasTrabajados}</td>
+          <td class="money-positive">$${salarioBase.toFixed(2)}</td>
+          <td class="money-positive">$${comisionCortes.toFixed(2)}</td>
+          <td class="money-positive">$${comisionProductos.toFixed(2)}</td>
+          <td class="money-positive">$${horasExtras.toFixed(2)}</td>
+          <td class="money-positive">$${diasDobles.toFixed(2)}</td>
+          <td class="money-negative">-$${descuentos.toFixed(2)}</td>
+          <td class="money-total">$${totalNeto.toFixed(2)}</td>
+          <td>
+            <button onclick="verBoleta('${empleado.dui}')" class="btn-pdf">
+              <i class="fas fa-eye"></i> Ver Boleta
+            </button>
+          </td>
+        `;
+        
+        tbody.appendChild(fila);
+      });
+
+      document.getElementById('statsContainer').style.display = 'grid';
+    }
+
+    // ===================================================
+    // ESTADÍSTICAS
+    // ===================================================
+    
+    function actualizarEstadisticas(salarios) {
+      const totales = salarios.reduce((acc, emp) => ({
+        empleados: acc.empleados + 1,
+        salarios: acc.salarios + parseFloat(emp.salario_base || 0),
+        comisiones: acc.comisiones + parseFloat(emp.comision_servicios || 0) + parseFloat(emp.comision_productos || 0),
+        extras: acc.extras + parseFloat(emp.total_horas_extras || 0) + parseFloat(emp.total_dias_dobles || 0),
+        descuentos: acc.descuentos + parseFloat(emp.total_descuentos || 0),
+        neto: acc.neto + parseFloat(emp.total_neto || 0)
+      }), {
+        empleados: 0,
+        salarios: 0,
+        comisiones: 0,
+        extras: 0,
+        descuentos: 0,
+        neto: 0
+      });
+
+      document.getElementById('totalEmpleados').textContent = totales.empleados;
+      document.getElementById('totalSalarios').textContent = `$${totales.salarios.toFixed(2)}`;
+      document.getElementById('totalComisiones').textContent = `$${totales.comisiones.toFixed(2)}`;
+      document.getElementById('totalExtras').textContent = `$${totales.extras.toFixed(2)}`;
+      document.getElementById('totalDescuentos').textContent = `$${totales.descuentos.toFixed(2)}`;
+      document.getElementById('totalNeto').textContent = `$${totales.neto.toFixed(2)}`;
+    }
+
+    // ===================================================
+    // DESCARGAR BOLETA PDF
+    // ===================================================
+    
+    async function descargarBoleta(dui) {
+      console.log('📄 Generando boleta PDF para:', dui);
+      
+      const empleado = salariosDatos.find(emp => emp.dui === dui);
+      if (!empleado) {
+        mostrarNotificacion('error', 'No se encontraron datos del empleado');
+        return;
+      }
+
+      const fechaDesde = document.getElementById('fechaDesde').value;
+      const fechaHasta = document.getElementById('fechaHasta').value;
+
+      try {
+        const response = await fetch('/api/generar-boleta-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            empleado: empleado,
+            periodo: { desde: fechaDesde, hasta: fechaHasta }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boleta_${empleado.nombre.replace(/\s+/g, '_')}_${fechaDesde}_${fechaHasta}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        mostrarNotificacion('success', 'Boleta PDF descargada correctamente');
+
+      } catch (error) {
+        console.error('❌ Error generando PDF:', error);
+        mostrarNotificacion('error', `Error: ${error.message}`);
+      }
+    }
+
+    // ===================================================
+    // NUEVA FUNCIÓN PARA VER BOLETA COMO HTML
+    // ===================================================
+    function verBoleta(dui) {
+      console.log('👁️ Abriendo vista de boleta para:', dui);
+      
+      const empleado = salariosDatos.find(emp => emp.dui === dui);
+      if (!empleado) {
+        mostrarNotificacion('error', 'No se encontraron datos del empleado');
+        return;
+      }
+
+      const fechaDesde = document.getElementById('fechaDesde').value;
+      const fechaHasta = document.getElementById('fechaHasta').value;
+
+      if (!fechaDesde || !fechaHasta) {
+        mostrarNotificacion('error', 'Debe seleccionar las fechas del período');
+        return;
+      }
+
+      // Construir URL con parámetros
+      const url = `/boleta/vista/${dui}?desde=${fechaDesde}&hasta=${fechaHasta}`;
+      
+      // Abrir en nueva pestaña
+      window.open(url, '_blank');
+    }
+
+    // ===================================================
+    // EXPORTAR EXCEL
+    // ===================================================
+    
+    function exportarExcel() {
+      if (!salariosDatos || salariosDatos.length === 0) {
+        mostrarNotificacion('warning', 'No hay datos para exportar');
+        return;
+      }
+
+      const tabla = document.getElementById('tablaSalarios');
+      const wb = XLSX.utils.table_to_book(tabla);
+      
+      const fechaDesde = document.getElementById('fechaDesde').value;
+      const fechaHasta = document.getElementById('fechaHasta').value;
+      const filename = `salarios_${fechaDesde}_${fechaHasta}.xlsx`;
+      
+      XLSX.writeFile(wb, filename);
+      mostrarNotificacion('success', 'Archivo Excel exportado correctamente');
+    }
+
+    // ===================================================
+    // FUNCIONES AUXILIARES
+    // ===================================================
+    
+    function mostrarEstadoCarga() {
+      const tbody = document.querySelector('#tablaSalarios tbody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="loading-state">
+            <i class="fas fa-spinner spinning"></i><br>
+            <strong>Calculando salarios...</strong><br>
+            <small>Procesando datos de empleados, comisiones y descuentos</small>
+          </td>
+        </tr>
+      `;
+      document.getElementById('statsContainer').style.display = 'none';
+    }
+
+    function mostrarEstadoError(mensaje) {
+      const tbody = document.querySelector('#tablaSalarios tbody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="empty-state" style="color: #dc3545;">
+            <i class="fas fa-exclamation-triangle"></i><br>
+            <strong>Error al calcular salarios</strong><br>
+            <small>${mensaje}</small>
+          </td>
+        </tr>
+      `;
+      document.getElementById('statsContainer').style.display = 'none';
+    }
+
+    function bloquearBoton(id, texto) {
+      const btn = document.getElementById(id);
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${texto}`;
+      btn.style.opacity = '0.7';
+    }
+
+    function desbloquearBoton(id, html) {
+      const btn = document.getElementById(id);
+      btn.disabled = false;
+      btn.innerHTML = html;
+      btn.style.opacity = '1';
+    }
+
+    function mostrarNotificacion(tipo, mensaje) {
+      // Eliminar notificaciones existentes
+      const existente = document.querySelector('.notification');
+      if (existente) {
+        existente.remove();
+      }
+
+      const notification = document.createElement('div');
+      notification.className = `notification ${tipo}`;
+      notification.innerHTML = `
+        <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+        ${mensaje}
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 100);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

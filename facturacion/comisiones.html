@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle de Comisiones por Barbero</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    .producto-row {
+      background-color: rgba(200, 230, 200, 0.2);
+    }
+    .producto-row:hover {
+      background-color: rgba(200, 230, 200, 0.4);
+    }
+    
+    /* Estilos adicionales para mejorar la visualización */
+    .total-row {
+      background-color: rgba(100, 100, 200, 0.1);
+      font-weight: bold;
+      border-top: 2px solid rgba(100, 100, 200, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+    <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+      <i class="fas fa-arrow-left"></i> Centro de Reportes
+    </button>
+  </div>
+
+  <div class="container">
+    <h1>Resumen de comisiones por barbero</h1>
+    
+    <!-- Filtros -->
+    <div class="card glass mb-3">
+      <div class="form-grid">
+        <label>Desde <input type="date" id="filtroDesde"></label>
+        <label>Hasta <input type="date" id="filtroHasta"></label>
+        <label>Barbero
+          <select id="filtroBarbero">
+            <option value="">Todos</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="btnAplicarFiltro" class="btn-search">
+        <i class="fas fa-filter"></i> Filtrar
+      </button>
+      <button id="btnLimpiarFiltro" class="btn-secondary">
+        <i class="fas fa-eraser"></i> Limpiar
+      </button>
+      <button id="exportarExcel" class="btn-search">
+        <i class="fas fa-file-excel"></i> Exportar Excel
+      </button>
+    </div>
+
+    <!-- Resumen general -->
+    <div class="card glass mt-4">
+      <h2>Resumen por Barbero</h2>
+      <div class="table-responsive">
+        <table id="tablaResumen">
+          <thead>
+            <tr>
+              <th>Barbero</th>
+              <th>Cantidad Servicios</th>
+              <th>Cantidad Productos</th>
+              <th>Ventas Servicios</th>
+              <th>Ventas Productos</th>
+              <th>Total Comisiones</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detalle de servicios del barbero seleccionado -->
+    <div class="card glass mt-4" id="seccionDetalle" style="display: none;">
+      <h2>Detalle de Servicios: <span id="nombreBarbero"></span></h2>
+      
+      <!-- Botón para exportar solo el detalle -->
+      <button id="exportarDetalleExcel" class="btn-search" style="margin-bottom: 15px;">
+        <i class="fas fa-file-excel"></i> Exportar Detalle a Excel
+      </button>
+      
+      <div class="table-responsive">
+        <table id="tablaDetalle">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Factura</th>
+              <th>Comanda</th>
+              <th>Servicio</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Precio Unit.</th>
+              <th>Comisión</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('Inicializando página de comisiones...');
+
+      // Configurar fecha actual por defecto
+      const hoy = new Date();
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      
+      document.getElementById('filtroDesde').value = formatoISO(inicioMes);
+      document.getElementById('filtroHasta').value = formatoISO(hoy);
+      
+      // Cargar lista de barberos
+      await cargarBarberos();
+      
+      // Cargar datos iniciales
+      await cargarResumen();
+      
+      // Configurar eventos
+      document.getElementById('btnAplicarFiltro').addEventListener('click', cargarResumen);
+      document.getElementById('btnLimpiarFiltro').addEventListener('click', limpiarFiltros);
+      document.getElementById('exportarExcel').addEventListener('click', exportarExcel);
+      document.getElementById('exportarDetalleExcel').addEventListener('click', exportarDetalleExcel);
+    });
+
+    // Función para formatear fecha en formato de input date (YYYY-MM-DD)
+    function formatoISO(fecha) {
+      return fecha.toISOString().split('T')[0];
+    }
+
+    // Función para convertir fecha de YYYY-MM-DD a DD/MM/YYYY
+    function formatoLatam(fecha) {
+      // Si la fecha está en formato YYYY-MM-DD
+      if (typeof fecha === 'string' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [anio, mes, dia] = fecha.split('-');
+        return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${anio}`;
+      }
+      // Si es un objeto Date
+      else if (fecha instanceof Date) {
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        return `${dia}/${mes}/${anio}`;
+      }
+      return fecha; // En caso de no poder formatear, devolver como está
+    }
+
+    // Función para cargar barberos en el filtro
+    async function cargarBarberos() {
+      try {
+        console.log('Cargando lista de barberos...');
+        const res = await fetch('/api/empleados');
+        const empleados = await res.json();
+        
+        const select = document.getElementById('filtroBarbero');
+        select.innerHTML = '<option value="">Todos</option>';
+        
+        // Incluir todos los empleados por ahora
+        empleados.forEach(emp => {
+          const opt = document.createElement('option');
+          opt.value = emp.nombre;
+          opt.textContent = emp.nombre;
+          select.appendChild(opt);
+        });
+
+        console.log(`Cargados ${empleados.length} empleados en el selector`);
+      } catch (err) {
+        console.error('Error al cargar barberos:', err);
+        alert('No se pudieron cargar los barberos. Intente nuevamente.');
+      }
+    }
+
+    // Función para cargar resumen
+    async function cargarResumen() {
+      // Obtenemos las fechas del formulario (están en formato YYYY-MM-DD por el input date)
+      const desdeISO = document.getElementById('filtroDesde').value;
+      const hastaISO = document.getElementById('filtroHasta').value;
+      const barbero = document.getElementById('filtroBarbero').value;
+      
+      if (!desdeISO || !hastaISO) {
+        alert('Por favor seleccione fechas válidas');
+        return;
+      }
+      
+      try {
+        console.log('Fechas seleccionadas (ISO):', { desdeISO, hastaISO });
+        
+        // URL con las fechas en formato original para que el servidor las convierta
+        const url = `/api/comisiones?desde=${encodeURIComponent(desdeISO)}&hasta=${encodeURIComponent(hastaISO)}${barbero ? `&barbero=${encodeURIComponent(barbero)}` : ''}`;
+        console.log('URL de consulta:', url);
+        
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Error HTTP: ${res.status} ${res.statusText}. Detalles: ${errorText}`);
+        }
+        
+        const data = await res.json();
+        console.log('Datos recibidos:', data);
+        
+        // Para cada empleado, obtener también sus detalles para poder calcular correctamente
+        for (let i = 0; i < data.length; i++) {
+          const empleado = data[i].empleado;
+          try {
+            const detalleUrl = `/api/comisiones/detalle?empleado=${encodeURIComponent(empleado)}&desde=${encodeURIComponent(desdeISO)}&hasta=${encodeURIComponent(hastaISO)}`;
+            const detalleRes = await fetch(detalleUrl);
+            if (detalleRes.ok) {
+              const detalleData = await detalleRes.json();
+              // Adjuntar los detalles al objeto del empleado
+              data[i].detalles = detalleData;
+            }
+          } catch (err) {
+            console.error(`Error al obtener detalles para ${empleado}:`, err);
+          }
+        }
+        
+        renderizarTablaResumen(data);
+        
+        // Ocultar detalles al cargar un nuevo resumen
+        document.getElementById('seccionDetalle').style.display = 'none';
+        
+        // Si no hay datos, mostrar mensaje más específico
+        if (data.length === 0) {
+          alert('No se encontraron comisiones para el período seleccionado.');
+        }
+      } catch (err) {
+        console.error('Error al cargar resumen:', err);
+        alert('No se pudo cargar el resumen de comisiones. Intente nuevamente. Error: ' + err.message);
+      }
+    }
+
+    // Función para renderizar tabla de resumen
+    function renderizarTablaResumen(data) {
+      const tbody = document.querySelector('#tablaResumen tbody');
+      tbody.innerHTML = '';
+      
+      if (data.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="7" class="text-center">No hay datos para mostrar</td>';
+        tbody.appendChild(row);
+        return;
+      }
+      
+      data.forEach(item => {
+        // Preparamos variables para calcular los totales correctamente
+        let serviciosCount = 0;
+        let productosCount = 0;
+        let ventasServicios = 0;
+        let ventasProductos = 0;
+        
+        // Si tenemos detalles disponibles, calculamos desde los detalles para mayor precisión
+        if (item.detalles && Array.isArray(item.detalles)) {
+          console.log("Procesando detalles para", item.empleado, item.detalles);
+          
+          // Iteramos sobre cada detalle para clasificarlo como servicio o producto
+          item.detalles.forEach(detalle => {
+            const tipo = detalle.tipo || 'corte';
+            const cantidad = parseInt(detalle.cantidad) || 0;
+            
+            // IMPORTANTE: Usar el total directamente del servidor sin recalcularlo
+            const total = parseFloat(detalle.total || 0);
+            
+            if (tipo === 'producto') {
+              // Es un producto
+              productosCount += cantidad;
+              ventasProductos += total; // Usar el total directamente
+              
+              console.log(`Producto: ${detalle.servicio}, Cantidad: ${cantidad}, Total: ${total}`);
+            } else {
+              // Es un servicio
+              serviciosCount += cantidad;
+              ventasServicios += total; // Usar el total directamente
+              
+              console.log(`Servicio: ${detalle.servicio}, Cantidad: ${cantidad}, Total: ${total}`);
+            }
+          });
+        } else {
+          // Si no tenemos detalles, utilizamos los totales agregados (menos precisos)
+          console.log("Sin detalles para", item.empleado, "utilizando totales agregados");
+          serviciosCount = item.total_servicios || 0;
+          productosCount = item.productos || 0;
+          ventasServicios = parseFloat(item.ventas_servicios || 0);
+          ventasProductos = parseFloat(item.ventas_productos || 0);
+        }
+        
+        console.log(`Resumen calculado para ${item.empleado}:`, {
+          servicios: serviciosCount,
+          productos: productosCount,
+          ventasServicios: ventasServicios,
+          ventasProductos: ventasProductos
+        });
+        
+        // Crear la fila del resumen
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.empleado}</td>
+          <td>${serviciosCount}</td>
+          <td>${productosCount}</td>
+          <td>$${ventasServicios.toFixed(2)}</td>
+          <td>$${ventasProductos.toFixed(2)}</td>
+          <td>$${parseFloat(item.total_comision).toFixed(2)}</td>
+          <td>
+            <button class="btn-search" onclick="verDetalle('${item.empleado}')">
+              <i class="fas fa-search"></i> Ver Detalle
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Función para ver detalle
+    async function verDetalle(empleado) {
+      // Obtenemos las fechas del formulario (están en formato YYYY-MM-DD)
+      const desdeISO = document.getElementById('filtroDesde').value;
+      const hastaISO = document.getElementById('filtroHasta').value;
+      
+      try {
+        console.log('Cargando detalles para:', empleado, { desdeISO, hastaISO });
+        
+        // Consumir API para obtener los detalles de comisiones
+        const url = `/api/comisiones/detalle?empleado=${encodeURIComponent(empleado)}&desde=${encodeURIComponent(desdeISO)}&hasta=${encodeURIComponent(hastaISO)}`;
+        console.log('URL de consulta detalle:', url);
+        
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Error HTTP: ${res.status} ${res.statusText}. Detalles: ${errorText}`);
+        }
+        
+        const data = await res.json();
+        console.log('Detalles recibidos:', data);
+        
+        // Mostrar nombre del barbero
+        document.getElementById('nombreBarbero').textContent = empleado;
+        
+        // Renderizar tabla de detalles
+        renderizarTablaDetalle(data);
+        
+        // Mostrar la sección de detalles
+        document.getElementById('seccionDetalle').style.display = 'block';
+        
+        // Desplazar al usuario a la sección de detalles
+        document.getElementById('seccionDetalle').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        console.error('Error al cargar detalles:', err);
+        alert('No se pudieron cargar los detalles. Intente nuevamente. Error: ' + err.message);
+      }
+    }
+
+    // FUNCIÓN CORREGIDA: renderizarTablaDetalle - con precio unitario promedio en la fila de totales
+    function renderizarTablaDetalle(data) {
+      const tbody = document.querySelector('#tablaDetalle tbody');
+      tbody.innerHTML = '';
+      
+      if (data.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="8" class="text-center">No hay detalles para mostrar</td>';
+        tbody.appendChild(row);
+        return;
+      }
+      
+      // Ordenar primero por fecha y luego por tipo (servicios primero, productos después)
+      data.sort((a, b) => {
+        // Primero ordenar por fecha
+        if (a.fecha !== b.fecha) {
+          return a.fecha.localeCompare(b.fecha);
+        }
+        
+        // Si las fechas son iguales, ordenar por tipo
+        const tipoA = a.tipo || 'corte';
+        const tipoB = b.tipo || 'corte';
+        
+        // Servicios (cortes) primero, productos después
+        return tipoA === tipoB ? 0 : tipoA === 'corte' ? -1 : 1;
+      });
+      
+      // Variables para calcular los totales
+      let totalVentas = 0;
+      let totalComisiones = 0;
+      let cantidadTotal = 0;
+      
+      // Para cada ítem en los datos
+      data.forEach(item => {
+        // Obtener datos básicos
+        const cantidad = parseInt(item.cantidad) || 1;
+        cantidadTotal += cantidad;
+        
+        // CORRECCIÓN IMPORTANTE: Usar el total directamente del servidor
+        const total = parseFloat(item.total || 0);
+        
+        // Calcular precio unitario
+        const precioUnitario = cantidad > 0 ? total : 0;
+        
+        // Sumar al total general
+        totalVentas += total;
+        
+        // Sumar comisiones
+        const comision = parseFloat(item.comision || 0);
+        totalComisiones += comision;
+        
+        // Determinar tipo
+        const tipo = item.tipo || 'corte';
+        
+        // Logs para depuración
+        console.log(`Item: ${item.servicio}, Tipo: ${tipo}, Cantidad: ${cantidad}, Total: ${total}, Unitario: ${precioUnitario}`);
+        
+        // Crear fila en la tabla
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.fecha}</td>
+          <td>${item.factura}</td>
+          <td>${item.comanda}</td>
+          <td>${item.servicio}</td>
+          <td>${tipo === 'producto' ? 'Producto' : 'Servicio'}</td>
+          <td>${cantidad}</td>
+          <td>$${precioUnitario.toFixed(2)}</td>
+          <td>$${comision.toFixed(2)}</td>
+        `;
+        
+        // Aplicar estilo específico para productos
+        if (tipo === 'producto') {
+          row.classList.add('producto-row');
+        }
+        
+        tbody.appendChild(row);
+      });
+      
+      // CORRECCIÓN: Calcular precio unitario promedio para la fila de totales
+      const precioUnitarioPromedio = cantidadTotal > 0 ? totalVentas / cantidadTotal : 0;
+      
+      // Agregar fila de totales
+      const rowTotal = document.createElement('tr');
+      rowTotal.classList.add('total-row');
+      rowTotal.innerHTML = `
+        <td colspan="5">TOTALES</td>
+        <td>${cantidadTotal}</td>
+        <td>$${totalVentas.toFixed(2)}</td>
+        <td>$${totalComisiones.toFixed(2)}</td>
+      `;
+      tbody.appendChild(rowTotal);
+    }
+
+    // Función para limpiar filtros
+    function limpiarFiltros() {
+      console.log('Limpiando filtros...');
+      
+      // Restablecer fecha actual
+      const hoy = new Date();
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      
+      document.getElementById('filtroDesde').value = formatoISO(inicioMes);
+      document.getElementById('filtroHasta').value = formatoISO(hoy);
+      document.getElementById('filtroBarbero').value = '';
+      
+      // Ocultar la sección de detalles
+      document.getElementById('seccionDetalle').style.display = 'none';
+      
+      // Recargar datos
+      cargarResumen();
+    }
+
+    // Función para exportar a Excel (ambas tablas)
+    function exportarExcel() {
+      console.log('Exportando a Excel...');
+      
+      // Crear un libro de Excel
+      const wb = XLSX.utils.book_new();
+      
+      // Agregar la tabla de resumen
+      const ws1 = XLSX.utils.table_to_sheet(document.getElementById('tablaResumen'));
+      XLSX.utils.book_append_sheet(wb, ws1, "Resumen");
+      
+      // Si el detalle está visible, también exportarlo
+      if (document.getElementById('seccionDetalle').style.display !== 'none') {
+        const nombreBarbero = document.getElementById('nombreBarbero').textContent;
+        const ws2 = XLSX.utils.table_to_sheet(document.getElementById('tablaDetalle'));
+        XLSX.utils.book_append_sheet(wb, ws2, `Detalle ${nombreBarbero}`);
+      }
+      
+      // Generar el archivo
+      const desde = document.getElementById('filtroDesde').value;
+      const hasta = document.getElementById('filtroHasta').value;
+      XLSX.writeFile(wb, `Comisiones_${desde}_a_${hasta}.xlsx`);
+    }
+
+    // Función para exportar solo la tabla de detalle
+    function exportarDetalleExcel() {
+      console.log('Exportando detalle a Excel...');
+      
+      const nombreBarbero = document.getElementById('nombreBarbero').textContent;
+      const desde = document.getElementById('filtroDesde').value;
+      const hasta = document.getElementById('filtroHasta').value;
+      
+      // Crear un libro de Excel
+      const wb = XLSX.utils.book_new();
+      
+      // Agregar solo la tabla de detalle
+      const ws = XLSX.utils.table_to_sheet(document.getElementById('tablaDetalle'));
+      XLSX.utils.book_append_sheet(wb, ws, `Detalle ${nombreBarbero}`);
+      
+      // Generar el archivo
+      XLSX.writeFile(wb, `Comisiones_Detalle_${nombreBarbero}_${desde}_a_${hasta}.xlsx`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cierre de Caja Completo - Sucursal Escalón</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="cierre.css">
+</head>
+<body>
+    <!-- Header Principal -->
+    <header class="header-principal">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-cut"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Barba Negra</h1>
+                    <div class="sucursal-badge">Sucursal Escalón</div>
+                </div>
+            </div>
+            
+            <div class="header-info">
+                <div class="fecha-actual" id="fechaHeader"></div>
+                <a href="/indexreportes.html" class="btn-regresar">
+                    <i class="fas fa-arrow-left"></i> Menú Principal
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Principal -->
+    <div class="main-container">
+        <div class="cierre-card fade-in">
+            <!-- Header de la tarjeta -->
+            <div class="cierre-header">
+                <h2>
+                    <i class="fas fa-cash-register"></i>
+                    Cierre de Caja Ejecutivo
+                </h2>
+                <p class="cierre-subtitle">Sistema integral de control diario - Sucursal Escalón</p>
+            </div>
+
+            <!-- Controles de fecha y responsable -->
+            <div class="controles-section">
+                <div class="control-group">
+                    <label for="fechaCierre">
+                        <i class="fas fa-calendar-alt"></i> Fecha de Cierre
+                    </label>
+                    <input type="date" id="fechaCierre">
+                </div>
+                
+                <div class="control-group">
+                    <label for="responsable">
+                        <i class="fas fa-user-tie"></i> Responsable
+                    </label>
+                    <select id="responsable">
+                        <option value="">Seleccionar responsable</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn-consultar" id="btnConsultar">
+                        <i class="fas fa-search"></i>
+                        Consultar Datos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingCierre" class="loading-container">
+                <div class="spinner"></div>
+                <span style="margin-left: 1rem;">Procesando datos del cierre...</span>
+            </div>
+
+            <!-- Métricas Principales -->
+            <div class="metricas-principales">
+                <!-- Ingresos Totales -->
+                <div class="metrica-card">
+                    <div class="metrica-header">
+                        <div class="metrica-titulo">Ingresos Totales</div>
+                        <div class="metrica-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="metrica-valor" id="totalVentas">$0.00</div>
+                    <div class="metrica-detalle">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Servicios + Productos + Membresías</span>
+                    </div>
+                </div>
+
+                <!-- Transacciones -->
+                <div class="metrica-card">
+                    <div class="metrica-header">
+                        <div class="metrica-titulo">Total Transacciones</div>
+                        <div class="metrica-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                    </div>
+                    <div class="metrica-valor" id="totalTransacciones">0</div>
+                    <div class="metrica-detalle">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="conteoFacturas">0</span> facturas + <span id="conteoMembresias">0</span> membresías
+                    </div>
+                </div>
+
+                <!-- Comisiones -->
+                <div class="metrica-card">
+                    <div class="metrica-header">
+                        <div class="metrica-titulo">Comisiones Pagadas</div>
+                        <div class="metrica-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                    </div>
+                    <div class="metrica-valor" id="totalComisiones">$0.00</div>
+                    <div class="metrica-detalle">
+                        <i class="fas fa-users"></i>
+                        <span>Servicios + Productos</span>
+                    </div>
+                </div>
+
+                <!-- Utilidad Neta -->
+                <div class="metrica-card">
+                    <div class="metrica-header">
+                        <div class="metrica-titulo">Utilidad Neta</div>
+                        <div class="metrica-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="metrica-valor" id="utilidadNeta">$0.00</div>
+                    <div class="metrica-detalle">
+                        <i class="fas fa-percentage"></i>
+                        Margen: <span id="margenUtilidad">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ventas por Método de Pago -->
+            <div class="detalle-card" style="margin-bottom: 2rem;">
+                <div class="detalle-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>Ventas por Método de Pago</h3>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div class="metrica-card">
+                        <div class="metrica-titulo">Efectivo</div>
+                        <div class="metrica-valor" id="ventasEfectivo">$0.00</div>
+                    </div>
+                    <div class="metrica-card">
+                        <div class="metrica-titulo">Tarjeta</div>
+                        <div class="metrica-valor" id="ventasTarjeta">$0.00</div>
+                    </div>
+                    <div class="metrica-card">
+                        <div class="metrica-titulo">Otros</div>
+                        <div class="metrica-valor" id="ventasTransferencia">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalles de Servicios y Productos -->
+            <div class="detalles-section">
+                <!-- Servicios -->
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-cut"></i>
+                        <h3>Análisis de Servicios</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Servicios Realizados</div>
+                            <div class="metrica-valor" style="font-size: 1.5rem;" id="cantidadServicios">0</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Ingresos por Servicios</div>
+                            <div class="metrica-valor" style="font-size: 1.5rem;" id="totalIngresoServicios">$0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div id="detalleServiciosContainer">
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            <i class="fas fa-info-circle"></i> 
+                            Consulte los datos para ver el detalle de servicios
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Productos -->
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h3>Análisis de Productos</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Productos Vendidos</div>
+                            <div class="metrica-valor" style="font-size: 1.5rem;" id="cantidadProductos">0</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Ingresos por Productos</div>
+                            <div class="metrica-valor" style="font-size: 1.5rem;" id="totalIngresoProductos">$0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div id="detalleProductosContainer">
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            <i class="fas fa-info-circle"></i> 
+                            Consulte los datos para ver el detalle de productos
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comisiones por Empleado -->
+            <div class="detalle-card" style="margin-bottom: 2rem;">
+                <div class="detalle-header">
+                    <i class="fas fa-users"></i>
+                    <h3>Comisiones por Empleado</h3>
+                </div>
+                <div id="detalleComisionesContainer">
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        Consulte los datos para ver el detalle de comisiones
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cortes Gratis (Tarjeta Fidelidad) -->
+            <div class="detalle-card" style="margin-bottom: 2rem; border-left: 4px solid #28a745;">
+                <div class="detalle-header" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <i class="fas fa-gift" style="color: white;"></i>
+                    <h3 style="color: white;">Cortes Gratis - Tarjeta Fidelidad</h3>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="metrica-card" style="border-left: 3px solid #28a745;">
+                        <div class="metrica-titulo">Total Cortes Gratis</div>
+                        <div class="metrica-valor" style="font-size: 1.8rem; color: #28a745;" id="totalCortesGratis">0</div>
+                        <div class="metrica-detalle">
+                            <i class="fas fa-heart"></i>
+                            <span>Décimo sello completado</span>
+                        </div>
+                    </div>
+                    <div class="metrica-card" style="border-left: 3px solid #28a745;">
+                        <div class="metrica-titulo">Valor Total Regalado</div>
+                        <div class="metrica-valor" style="font-size: 1.8rem; color: #28a745;" id="valorCortesGratis">$0.00</div>
+                        <div class="metrica-detalle">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Costo de fidelización</span>
+                        </div>
+                    </div>
+                    <div class="metrica-card" style="border-left: 3px solid #28a745;">
+                        <div class="metrica-titulo">Clientes Beneficiados</div>
+                        <div class="metrica-valor" style="font-size: 1.8rem; color: #28a745;" id="clientesBeneficiados">0</div>
+                        <div class="metrica-detalle">
+                            <i class="fas fa-users"></i>
+                            <span>Programa fidelidad</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="detalleCortesGratisContainer">
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        Consulte los datos para ver el detalle de cortes gratis
+                    </p>
+                </div>
+            </div>
+
+            <!-- Rangos de Operación - SECCIÓN CORREGIDA -->
+            <div class="detalles-section">
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-list-ol"></i>
+                        <h3>Rangos de Comandas del Día</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Comanda Inicial</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>#0</span>
+                            </div>
+                            <div class="metrica-detalle">Primera del día</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Comanda Final</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>#0</span>
+                            </div>
+                            <div class="metrica-detalle">Última del día</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Total Comandas</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>0</span>
+                            </div>
+                            <div class="metrica-detalle">Comandas procesadas</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-file-invoice"></i>
+                        <h3>Rangos de Facturas del Día</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Factura Inicial</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>#0</span>
+                            </div>
+                            <div class="metrica-detalle">Primera del día</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Factura Final</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>#0</span>
+                            </div>
+                            <div class="metrica-detalle">Última del día</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Total Facturas</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;">
+                                <span>0</span>
+                            </div>
+                            <div class="metrica-detalle">Facturas emitidas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicadores de Rendimiento -->
+            <div class="detalles-section">
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Indicadores de Rendimiento</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Venta Promedio</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;" id="ventaPromedio">$0.00</div>
+                            <div class="metrica-detalle">Por transacción</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Margen de Utilidad</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;" id="margenUtilidad2">0%</div>
+                            <div class="metrica-detalle">Después de comisiones</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detalle-card">
+                    <div class="detalle-header">
+                        <i class="fas fa-trophy"></i>
+                        <h3>Productividad del Día</h3>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div class="metrica-titulo">Servicios por Hora</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;" id="serviciosPorHora">0</div>
+                            <div class="metrica-detalle">Promedio estimado</div>
+                        </div>
+                        <div>
+                            <div class="metrica-titulo">Eficiencia</div>
+                            <div class="metrica-valor" style="font-size: 1.3rem;" id="eficienciaGeneral">100%</div>
+                            <div class="metrica-detalle">Vs. meta diaria</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análisis de Efectivo -->
+            <div class="detalle-card" style="margin-bottom: 2rem;">
+                <div class="detalle-header">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>Control de Efectivo en Caja</h3>
+                </div>
+                
+                <div class="efectivo-section">
+                    <!-- Saldo Inicial -->
+                    <div>
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem;">
+                            <i class="fas fa-play-circle"></i> Saldo Inicial
+                        </h4>
+                        <div class="control-group">
+                            <label for="saldoInicial">Monto Inicial</label>
+                            <input type="number" id="saldoInicial" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="control-group">
+                            <label for="horaApertura">Hora de Apertura</label>
+                            <input type="time" id="horaApertura">
+                        </div>
+                    </div>
+                    
+                    <!-- Denominaciones -->
+                    <div>
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem;">
+                            <i class="fas fa-coins"></i> Efectivo Contado
+                        </h4>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$100</div>
+                            <input type="number" id="billete100" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$50</div>
+                            <input type="number" id="billete50" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$20</div>
+                            <input type="number" id="billete20" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$10</div>
+                            <input type="number" id="billete10" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$5</div>
+                            <input type="number" id="billete5" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">$1</div>
+                            <input type="number" id="billete1" class="denominacion-input billete" min="0" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        <div class="denominacion-item">
+                            <div class="denominacion-label">Monedas</div>
+                            <input type="number" id="monedas" class="denominacion-input" min="0" step="0.01" value="0">
+                            <div class="denominacion-subtotal">$0.00</div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid var(--accent-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 600; color: var(--accent-color);">Total Efectivo:</span>
+                                <span id="totalEfectivo" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-color);">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumen Final -->
+                    <div>
+                        <h4 style="color: var(--accent-color); margin-bottom: 1rem;">
+                            <i class="fas fa-calculator"></i> Resumen Final
+                        </h4>
+                        
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Efectivo Contado:</span>
+                                <span id="efectivoContado" style="font-weight: 600;">$0.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Ventas en Efectivo:</span>
+                                <span id="resumenVentasEfectivo" style="font-weight: 600;">$0.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Saldo Inicial:</span>
+                                <span id="resumenSaldoInicial" style="font-weight: 600;">$0.00</span>
+                            </div>
+                            <hr style="border: 1px solid rgba(255, 255, 255, 0.2); margin: 0.8rem 0;">
+                            <div style="display: flex; justify-content: space-between; font-size: 1.1rem;">
+                                <span style="font-weight: 700; color: var(--accent-color);">Diferencia:</span>
+                                <span id="diferencia" style="font-weight: 700; font-size: 1.2rem;">$0.00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="observaciones">
+                                <i class="fas fa-sticky-note"></i> Observaciones
+                            </label>
+                            <textarea id="observaciones" rows="4" placeholder="Registre observaciones del cierre..." style="min-height: 100px; resize: vertical;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="acciones-section">
+                <button class="btn-accion primary" id="btnVerCierre">
+                    <i class="fas fa-eye"></i>
+                    Ver Cierre
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // Inicialización básica
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar fecha actual en el header
+            const fechaHeader = document.getElementById('fechaHeader');
+            const hoy = new Date();
+            fechaHeader.textContent = hoy.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Animar elementos al cargar
+            setTimeout(() => {
+                document.querySelectorAll('.metrica-card, .detalle-card').forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('fade-in');
+                    }, index * 100);
+                });
+            }, 500);
+        });
+
+        // Función para formatear números como moneda con separadores de miles
+        function formatearMoneda(numero) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(numero);
+        }
+
+        // Función para calcular porcentaje de cambio
+        function calcularPorcentajeCambio(actual, anterior) {
+            if (anterior === 0) return actual > 0 ? '+100%' : '0%';
+            const cambio = ((actual - anterior) / anterior) * 100;
+            return (cambio >= 0 ? '+' : '') + cambio.toFixed(1) + '%';
+        }
+
+        // Event listeners para campos numéricos
+        document.addEventListener('DOMContentLoaded', function() {
+            const camposNumericos = document.querySelectorAll('.denominacion-input, #saldoInicial');
+            
+            camposNumericos.forEach(campo => {
+                campo.addEventListener('input', function(e) {
+                    // Validar entrada numérica
+                    let valor = e.target.value.replace(/[^0-9.]/g, '');
+                    const partes = valor.split('.');
+                    if (partes.length > 2) {
+                        valor = partes[0] + '.' + partes.slice(1).join('');
+                    }
+                    if (partes[1] && partes[1].length > 2) {
+                        valor = partes[0] + '.' + partes[1].substring(0, 2);
+                    }
+                    e.target.value = valor;
+                });
+                
+                campo.addEventListener('blur', function(e) {
+                    const valor = parseFloat(e.target.value) || 0;
+                    e.target.value = valor.toFixed(2);
+                });
+            });
+        });
+    </script>
+    
+    <!-- Incluir el JavaScript principal del cierre -->
+    <script src="cierre.js"></script>
+</body>
+</html>

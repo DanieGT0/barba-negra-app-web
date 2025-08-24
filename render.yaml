@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: barba-negra-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://barba:iuEQQkgQHOjbZOw28vN9wFxa0OwntCUG@dpg-d2kt4mbuibrs73ekfh00-a/barbanegra_0nil
+      - key: SESSION_SECRET
+        value: barba_negra_secret_key_2024_super_secure_random_string
+      - key: JWT_SECRET
+        value: barba_negra_jwt_secret_2024

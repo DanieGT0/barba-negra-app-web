@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Principal - Barbershop</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #1a1a2e;
+      --secondary-color: #16213e;
+      --accent-color: #9fd81a;
+      --text-color: #f1f1f1;
+      --card-bg: rgba(26, 26, 46, 0.8);
+      --card-hover: rgba(22, 33, 62, 0.9);
+      --transition: all 0.3s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+  font-family: 'Poppins', sans-serif;
+  background: url('imagenes/fondo-barberia1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .logo { display: flex; align-items: center; gap: 1rem; }
+    .logo-icon { font-size: 2rem; color: var(--accent-color); }
+    h1 { font-size: 1.8rem; font-weight: 600; letter-spacing: 1px; }
+    .date-time { font-size: 0.9rem; color: rgba(241, 241, 241, 0.8); }
+
+    .dashboard-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;           /* elimina padding */
+  margin-left: 0;       /* elimina cualquier margen */
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-left: 1rem;   /* opcional: o usa 0 si quieres totalmente pegado */
+}
+
+
+
+
+.card-option {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 180px;
+
+  /* Efecto glass */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Efecto hover más claro */
+.card-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+
+/* Efecto hover: aclarar tarjeta */
+.card-option:hover {
+  background: rgba(255, 255, 255, 0.1); /* un color mucho más claro */
+  transform: scale(1.03);
+}
+
+
+    .card-option i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-color);
+    }
+
+    .card-option h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background-color: #1a1a2e;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background-color: #0e0201;
+    }
+
+    @media (max-width: 768px) {
+      header { flex-direction: column; gap: 0.5rem; text-align: center; }
+      .dashboard { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .card-option { height: 150px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Encabezado centrado -->
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-cut logo-icon"></i>
+        <h1>Barba Negra</h1>
+      </div>
+      <div>
+        <button onclick="cerrarSesion()" class="btn-logout">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+      </div>
+      <div class="date-time" id="dateTime"></div>
+    </header>
+  </div>
+
+  <!-- Tarjetas alineadas a la izquierda fuera del container -->
+  <div class="dashboard-container">
+    <div class="dashboard">
+      <div class="card-option" style="width: 100%; max-width: 400px;">
+        <h3>Meta Mensual</h3>
+        <label>Selecciona Mes:
+          <select id="mesSelect"></select>
+        </label>
+        <label>Año:
+          <input type="number" id="anioInput" style="width: 100%;" />
+        </label>
+        <label>Monto Meta:
+          <input type="number" id="metaInput" placeholder="Ej: 5000" style="width: 100%;" />
+        </label>
+        <button onclick="guardarMeta()">Guardar Meta</button>
+      </div>
+      
+      <div class="card-option" id="clientes" onclick="location.href='/clientes'">
+        <i class="fas fa-users"></i>
+        <h3>Clientes</h3>
+      </div>
+      <div class="card-option" id="empleados" onclick="location.href='/empleados'">
+        <i class="fas fa-user-tie"></i>
+        <h3>Empleados</h3>
+      </div>
+      <div class="card-option" id="facturacion" onclick="location.href='/facturacion'">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h3>Facturación</h3>
+      </div>
+      <div class="card-option" id="gastos" onclick="location.href='/gastos'">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h3>Gastos</h3>
+      </div>
+      <div class="card-option" id="inventarios" onclick="location.href='/inventarios'">
+        <i class="fas fa-boxes"></i>
+        <h3>Inventarios</h3>
+      </div>
+      <div class="card-option" id="compras" onclick="location.href='/compras'">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Compras</h3>
+      </div>
+      <div class="card-option" id="cortes" onclick="location.href='/cortes'">
+        <i class="fas fa-cut"></i>
+        <h3>Cortes</h3>
+      </div>
+      <div class="card-option" id="detallecortes" onclick="location.href='/detalle_cortes.html'">
+        <i class="fas fa-scissors"></i>
+        <h3>Detalle Cortes</h3>
+      </div>
+      <div class="card-option" id="detalleproductos" onclick="location.href='/detalle_productos.html'">
+        <i class="fas fa-box-open"></i>
+        <h3>Detalle Productos</h3>
+      </div>
+      <div class="card-option" id="planilla" onclick="location.href='/planilla'">
+        <i class="fas fa-money-check-alt"></i>
+        <h3>Planilla (Salarios)</h3>
+      </div>
+      <div class="card-option" id="citas" onclick="location.href='/citas'">
+        <i class="fa-solid fa-calendar-days"></i>
+        <h3>Agendar Citas</h3>
+      </div>
+      <div class="card-option" id="usuarios" onclick="location.href='/usuarios'">
+        <i class="fa-solid fa-calendar-days"></i>
+        <h3>Usuarios</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer también fuera del container -->
+  <footer style="margin-top: 2rem; font-size: 0.8rem; color: rgba(241,241,241,0.6);">
+    © 2025 Barba Negra
+  </footer>
+
+
+
+  <script>
+    function cerrarSesion() {
+      Swal.fire({
+        title: '¿Deseas cerrar sesión?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/logout';
+        }
+      });
+    }
+
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateStr = now.toLocaleDateString('es-ES', options);
+      const timeStr = now.toLocaleTimeString('es-ES');
+      document.getElementById('dateTime').textContent = `${dateStr} | ${timeStr}`;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Control de acceso según módulos permitidos
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/session')
+        .then(res => res.json())
+        .then(data => {
+          if (data.rol === 'Admin') return;
+
+          const permitidos = data.modulos;
+          const modulos = {
+            clientes: 'Clientes',
+            empleados: 'Empleados',
+            inventarios: 'Inventarios',
+            compras: 'Compras',
+            cortes: 'Cortes',
+            facturacion: 'Facturacion',
+            detallecortes: 'DetalleCortes',
+            detalleproductos: 'DetalleProductos',
+            planilla: 'Planilla',
+            citas: 'AgendarCitas',
+            usuarios:'Usuarios'
+
+          };
+
+          for (let id in modulos) {
+            if (!permitidos.includes(modulos[id])) {
+              const card = document.getElementById(id);
+              if (card) card.style.display = 'none';
+            }
+          }
+        })
+        .catch(err => {
+          console.error('Error al cargar sesión:', err);
+          window.location.href = '/login';
+        });
+    });
+
+
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const mesActual = new Date().getMonth();
+  const anioActual = new Date().getFullYear();
+
+  function cargarSelectMeses() {
+    const select = document.getElementById("mesSelect");
+    meses.forEach((m, i) => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      if (i === mesActual) opt.selected = true;
+      select.appendChild(opt);
+    });
+    document.getElementById("anioInput").value = anioActual;
+    cargarMeta();
+  }
+
+  function cargarMeta() {
+    const mes = document.getElementById("mesSelect").value;
+    const anio = document.getElementById("anioInput").value;
+    fetch(`/api/metas?anio=${anio}`)
+      .then(res => res.json())
+      .then(data => {
+        const meta = data.find(m => m.mes === mes);
+        document.getElementById("metaInput").value = meta ? meta.monto : '';
+      });
+  }
+
+  function guardarMeta() {
+    const mes = document.getElementById("mesSelect").value;
+    const anio = parseInt(document.getElementById("anioInput").value);
+    const monto = parseFloat(document.getElementById("metaInput").value);
+    fetch("/api/metas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ anio, mes, monto })
+    })
+    .then(res => res.json())
+    .then(data => Swal.fire("✅", data.mensaje, "success"))
+    .catch(err => Swal.fire("❌", "Error al guardar meta", "error"));
+  }
+
+  document.getElementById("mesSelect").addEventListener("change", cargarMeta);
+  document.getElementById("anioInput").addEventListener("change", cargarMeta);
+  document.addEventListener("DOMContentLoaded", cargarSelectMeses);
+  </script>
+</body>
+</html>

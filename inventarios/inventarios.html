@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRUD de Productos</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <!-- Agregar solo los estilos necesarios para ocultar/mostrar el formulario -->
+  <style>
+    /* Estilo para ocultar el formulario */
+    .form-hidden {
+      display: none;
+    }
+
+    /* Mejorar el botón de mostrar/ocultar (opcional) */
+    .btn-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 210px;
+      margin-bottom: 15px;
+    }
+
+    .btn-toggle i {
+      margin-left: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    /* Animación suave para mostrar/ocultar formulario */
+    #formProducto {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Estilos para indicar que el formulario está en modo edición */
+    .editing {
+      border: 2px solid #007bff;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    }
+
+    .editing h3::before {
+      content: "✏️ EDITANDO: ";
+      color: #007bff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Botones superiores -->
+    <div class="toggle-form-container">
+      <button id="toggleFormBtn" class="btn-toggle">
+        <span>Mostrar/Ocultar Formulario</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Menú Principal
+      </button>
+      <!-- Botón nuevo para reporte de existencias -->
+      <button id="reporteExistencias" class="btn-primary">
+        <i class="fas fa-file-alt"></i> Reporte de Existencias
+      </button>
+    </div>
+
+    <!-- Formulario - ya con la clase form-hidden aplicada para que esté oculto por defecto -->
+    <form id="formProducto" class="card glass form-hidden">
+      <h3 id="tituloFormulario">Registro de Producto</h3>
+      <input type="hidden" id="accion" value="crear">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="codigo">Código</label>
+          <input type="text" id="codigo" name="codigo" required placeholder="Ej: P001, PROD001, etc.">
+        </div>
+        <div class="form-group">
+          <label for="producto">Producto</label>
+          <input type="text" id="producto" name="producto" required>
+        </div>
+        <div class="form-group">
+          <label for="precio_venta">Precio Venta</label>
+          <input type="number" step="0.01" id="precio_venta" name="precio_venta" required>
+        </div>
+        <div class="form-group">
+          <label for="comision">Comisión</label>
+          <input type="number" step="0.01" id="comision" name="comision" required>
+        </div>
+        <!-- Campo nuevo para stock mínimo -->
+        <div class="form-group">
+          <label for="minimo">Stock Mínimo</label>
+          <input type="number" id="minimo" name="minimo" value="5">
+        </div>
+      </div>
+      <div class="buttons-container">
+        <button type="submit" class="btn-primary" id="btnGuardar">Guardar</button>
+        <button type="button" id="cancelar" class="btn-secondary">Cancelar</button>
+      </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="card glass mt-4">
+      <h2>Listado de Productos</h2>
+      <div class="search-container">
+        <input type="text" id="buscarProducto" placeholder="Buscar producto...">
+        <button id="exportarExcel" class="btn-search"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+        <button id="verVencimientos" class="btn-search"><i class="fas fa-calendar-alt"></i> Ver Vencimientos</button>
+      </div>
+      <div class="table-responsive">
+        <table id="tablaProductos">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Precio Venta</th>
+              <th>Comisión</th>
+              <th>Stock Mínimo</th>
+              <th>Existencia</th>
+              <th>Estado</th>
+              <th>Compra Promedio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Modal para Fechas de Vencimiento -->
+    <div id="modalVencimientos" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        
+        <h2><i class="fas fa-box-open"></i> Detalles de Producto - <span id="productoSeleccionado"></span></h2>
+        
+        <!-- Resumen de inventario -->
+        <div class="inventory-summary">
+          <div class="summary-item">
+            <div class="label">Total Adquirido</div>
+            <div class="value" id="totalAdquirido">0</div>
+            <div class="label">unidades</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="label">Total Vendido</div>
+            <div class="value" id="totalVendido">0</div>
+            <div class="label">unidades</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="label">Existencia Actual</div>
+            <div class="value" id="existenciaActual">0</div>
+            <div class="label">unidades</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="label">Costo Promedio</div>
+            <div class="value" id="costoPromedio">$0.00</div>
+            <div class="label">por unidad</div>
+          </div>
+        </div>
+        
+        <!-- Gráfico de balance -->
+        <div class="modal-section">
+          <h3><i class="fas fa-chart-pie"></i> Balance de Inventario</h3>
+          
+          <div class="balance-bar-container">
+            <div class="balance-bar-sold" id="balanceBarSold"></div>
+          </div>
+          
+          <div class="balance-labels">
+            <div class="balance-sold">Vendido: <span id="porcentajeVendido">0%</span></div>
+            <div class="balance-remaining">Existencia: <span id="porcentajeExistencia">0%</span></div>
+          </div>
+        </div>
+        
+        <!-- Tabla de lotes -->
+        <div class="modal-section">
+          <h3><i class="fas fa-history"></i> Historial de Lotes</h3>
+          
+          <div class="table-responsive">
+            <table id="tablaVencimientos">
+              <thead>
+                <tr>
+                  <th>Fecha de Compra</th>
+                  <th>Fecha de Vencimiento</th>
+                  <th>Cantidad</th>
+                  <th>Precio de Compra</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div class="modal-footer">
+          <button id="btnCerrarModal" class="btn-modal">
+            <i class="fas fa-times"></i> Cerrar
+          </button>
+          <button id="btnExportarLotes" class="btn-modal btn-modal-accent">
+            <i class="fas fa-file-export"></i> Exportar Detalles
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <script src="inventarios.js"></script>
+  
+  <!-- Script específico para la funcionalidad de mostrar/ocultar formulario -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const formProducto = document.getElementById('formProducto');
+      const toggleFormBtn = document.getElementById('toggleFormBtn');
+      const cancelarBtn = document.getElementById('cancelar');
+      const tituloFormulario = document.getElementById('tituloFormulario');
+      const btnGuardar = document.getElementById('btnGuardar');
+      
+      // Configurar botón de mostrar/ocultar formulario
+      toggleFormBtn.addEventListener('click', () => {
+        formProducto.classList.toggle('form-hidden');
+        
+        // Cambiar el ícono según el estado (abierto/cerrado)
+        const icon = toggleFormBtn.querySelector('i');
+        if (formProducto.classList.contains('form-hidden')) {
+          icon.className = 'fas fa-chevron-down';
+        } else {
+          icon.className = 'fas fa-chevron-up';
+          // Si se muestra el formulario manualmente, desplazar hasta arriba
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      });
+
+      // Mejorar el botón cancelar
+      cancelarBtn.addEventListener('click', () => {
+        // Limpiar formulario
+        document.getElementById('formProducto').reset();
+        document.getElementById('accion').value = 'crear';
+        document.getElementById('codigo').value = '';
+        
+        // Ocultar formulario
+        formProducto.classList.add('form-hidden');
+        
+        // Cambiar el ícono a "abajo" (formulario cerrado)
+        const icon = toggleFormBtn.querySelector('i');
+        icon.className = 'fas fa-chevron-down';
+        
+        // Remover clase de edición si existe
+        formProducto.classList.remove('editing');
+        
+        // Restaurar título y botón
+        tituloFormulario.textContent = 'Registro de Producto';
+        btnGuardar.textContent = 'Guardar';
+        
+        console.log('✅ Formulario cancelado y ocultado');
+      });
+
+      // Función global para configurar el formulario en modo edición
+      window.configurarModoEdicion = function(producto) {
+        formProducto.classList.add('editing');
+        tituloFormulario.textContent = `Editando: ${producto.producto}`;
+        btnGuardar.textContent = 'Actualizar';
+      };
+
+      // Función global para configurar el formulario en modo creación
+      window.configurarModoCreacion = function() {
+        formProducto.classList.remove('editing');
+        tituloFormulario.textContent = 'Registro de Producto';
+        btnGuardar.textContent = 'Guardar';
+      };
+    });
+  </script>
+</body>
+</html>

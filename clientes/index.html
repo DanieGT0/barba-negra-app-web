@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUD Clientes</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Botón para alternar el formulario -->
+    <div class="toggle-form-container">
+      <button id="toggleFormBtn" class="btn-toggle">
+        <span>Mostrar/Ocultar Formulario</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+    
+    <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+    <!-- Sección de formulario -->
+    <div id="formSection" class="card glass hidden">
+      <h1>Registro de Clientes</h1>
+      <form id="clienteForm">
+        <input type="hidden" id="accion" name="accion" value="crear">
+        <input type="hidden" id="cliente_id" name="cliente_id" value="">
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fecha">Fecha de Registro</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="dui">DUI</label>
+            <input type="text" id="dui" name="dui" required placeholder="Ej: 00000000-0" />
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" required placeholder="Nombre del cliente" />
+          </div>
+          
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" name="telefono" required placeholder="Ej: 7777-7777" />
+          </div>
+          
+          <div class="form-group">
+            <label for="correo">Correo Electrónico</label>
+            <input type="email" id="correo" name="correo" required placeholder="cliente@ejemplo.com" />
+          </div>
+          
+          <div class="form-group">
+            <label for="membresia">Estado de Membresía</label>
+            <select id="membresia" name="membresia" required>
+              <option value="Inactivo">Inactivo</option>
+              <option value="Activo">Activo</option>
+            </select>
+          </div>
+          
+          <div class="form-group fecha-container">
+            <label for="fecha_inicio">
+              <i class="fas fa-calendar-plus"></i> Fecha Inicio Membresía
+              <small style="display: block; color: #666; font-weight: normal; margin-top: 2px;">
+                (Editable - se establece por defecto hoy)
+              </small>
+            </label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" disabled />
+          </div>
+          
+          <div class="form-group fecha-container">
+            <label for="fecha_final">
+              <i class="fas fa-calendar-times"></i> Fecha Final Membresía
+              <small style="display: block; color: #666; font-weight: normal; margin-top: 2px;">
+                (Se calcula automáticamente: +30 días)
+              </small>
+            </label>
+            <input type="date" id="fecha_final" name="fecha_final" disabled readonly />
+          </div>
+          
+          <div class="form-group">
+            <label for="monto">
+              <i class="fas fa-dollar-sign"></i> Monto de Membresía
+            </label>
+            <input type="number" step="0.01" id="monto" name="monto" disabled placeholder="$0.00" />
+          </div>
+          
+          <div class="form-group tipo-pago-container">
+            <label for="tipo_pago">
+              <i class="fas fa-credit-card"></i> Tipo de Pago
+            </label>
+            <select id="tipo_pago" name="tipo_pago" disabled>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          
+          <!-- Nuevos campos para categoría y descuentos -->
+          <div class="form-group">
+            <label for="categoria">
+              <i class="fas fa-tag"></i> Categoría de Cliente
+            </label>
+            <select id="categoria" name="categoria" onchange="manejarCambioCategoria()">
+              <option value="normal">Cliente Normal</option>
+              <option value="preferencial">Cliente Preferencial</option>
+            </select>
+          </div>
+          
+          <div class="form-group empresa-container" style="display: none;">
+            <label for="empresa">
+              <i class="fas fa-building"></i> Nombre de la Empresa
+              <small style="display: block; color: #666; font-weight: normal; margin-top: 2px;">
+                (Empresa con convenio)
+              </small>
+            </label>
+            <input type="text" id="empresa" name="empresa" placeholder="Nombre de la empresa" />
+          </div>
+          
+          <div class="form-group descuento-container" style="display: none;">
+            <label for="descuento_porcentaje">
+              <i class="fas fa-percentage"></i> Descuento (%)
+              <small style="display: block; color: #666; font-weight: normal; margin-top: 2px;">
+                (Porcentaje de descuento automático)
+              </small>
+            </label>
+            <input type="number" step="0.01" min="0" max="100" id="descuento_porcentaje" name="descuento_porcentaje" placeholder="0.00" />
+          </div>
+        </div>
+        
+        <div class="buttons-container">
+          <button type="submit" id="submitBtn" class="btn-primary">Registrar Cliente</button>
+          <button type="button" id="cancelBtn" class="btn-secondary" style="display: none;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Sección de tabla separada -->
+    <div class="card glass mt-4">
+      <h2>Listado de Clientes</h2>
+      <div class="search-container">
+        <input type="text" id="searchDui" placeholder="Buscar por DUI">
+        <input type="text" id="searchNombre" placeholder="Buscar por Nombre">
+        <input type="date" id="fechaDesde" placeholder="Desde">
+        <input type="date" id="fechaHasta" placeholder="Hasta">
+        <button id="searchBtn" class="btn-search"><i class="fas fa-search"></i></button>
+        <button id="clearFiltersBtn" class="btn-search"><i class="fas fa-times"></i></button>
+        <button id="downloadExcelBtn" class="btn-search">
+          <i class="fas fa-file-excel"></i> Descargar Excel
+        </button>
+      </div>
+      <!-- Contenedor de tabla con scroll -->
+      <div class="table-scroll-container">
+        <table id="clientesTable" class="scroll-table">
+          <thead>
+            <tr>
+              <th>Fecha Registro</th>
+              <th>DUI</th>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+              <th>Membresía</th>
+              <th>Categoría</th>
+              <th>Empresa</th>
+              <th>Descuento</th>
+              <th>Inicio</th>
+              <th>Final</th>
+              <th>Monto</th>
+              <th>Tipo Pago</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Información de resultados -->
+      <div class="results-info">
+        <span id="contadorClientes" style="color: #9fd81a; font-weight: 500;">0 registros</span>
+      </div>
+      
+      <!-- Paginación integrada -->
+      <div class="pagination-container" id="paginationClientes" style="display: none;">
+        <div class="pagination-info">
+          <span id="paginationInfoClientes">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button onclick="cambiarPaginaClientes('first')" class="pagination-btn" id="firstBtnClientes">⏮</button>
+          <button onclick="cambiarPaginaClientes('prev')" class="pagination-btn" id="prevBtnClientes">⏪</button>
+          <span class="pagination-numbers" id="pageNumbersClientes"></span>
+          <button onclick="cambiarPaginaClientes('next')" class="pagination-btn" id="nextBtnClientes">⏩</button>
+          <button onclick="cambiarPaginaClientes('last')" class="pagination-btn" id="lastBtnClientes">⏭</button>
+        </div>
+        <div class="pagination-size">
+          <select id="pageSizeClientes" onchange="cambiarTamañoPaginaClientes()">
+            <option value="10">10 por página</option>
+            <option value="25" selected>25 por página</option>
+            <option value="50">50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
+  
+  <style>
+    /* Estilos para categorías de clientes */
+    .categoria-normal {
+      background: rgba(108, 117, 125, 0.2);
+      color: #6c757d;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+    
+    .categoria-preferencial {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+    
+    /* Campos de empresa y descuento */
+    .empresa-container,
+    .descuento-container {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Resaltar filas de clientes preferenciales */
+    .table-responsive table tbody tr:has(.categoria-preferencial) {
+      background: rgba(255, 193, 7, 0.05);
+      border-left: 3px solid #ffc107;
+    }
+    
+    /* ===================================================
+       ESTILOS PARA TABLA CON SCROLL Y PAGINACIÓN
+    =================================================== */
+    
+    .table-scroll-container {
+      width: 100%;
+      height: 60vh;
+      overflow: auto;
+      border: 2px solid rgba(159, 216, 26, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: #9fd81a rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #9fd81a;
+      border-radius: 6px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #8bc415;
+    }
+    
+    .scroll-table {
+      width: 100%;
+      min-width: 1200px;
+      border-collapse: collapse;
+      background: transparent;
+    }
+    
+    .scroll-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(159, 216, 26, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    .scroll-table th {
+      background: rgba(159, 216, 26, 0.15);
+      color: #9fd81a;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px 10px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(159, 216, 26, 0.2);
+      white-space: nowrap;
+      min-width: 120px;
+      position: sticky;
+      top: 0;
+    }
+    
+    .scroll-table td {
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    
+    .scroll-table tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .scroll-table tbody tr:hover {
+      background-color: rgba(159, 216, 26, 0.1);
+      transition: background-color 0.3s ease;
+    }
+    
+    /* Destacar registro recién creado */
+    .scroll-table tbody tr.newly-created {
+      background-color: rgba(159, 216, 26, 0.3);
+      animation: fadeHighlight 3s ease-out;
+    }
+    
+    @keyframes fadeHighlight {
+      0% { background-color: rgba(159, 216, 26, 0.5); }
+      100% { background-color: transparent; }
+    }
+    
+    /* ===================================================
+       ESTILOS DE PAGINACIÓN INTEGRADA
+    =================================================== */
+    
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .pagination-info {
+      color: #f1f1f1;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .pagination-btn {
+      background: rgba(159, 216, 26, 0.2);
+      color: #9fd81a;
+      border: 1px solid rgba(159, 216, 26, 0.3);
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pagination-numbers {
+      display: flex;
+      gap: 3px;
+      margin: 0 10px;
+    }
+    
+    .page-number {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      min-width: 35px;
+      text-align: center;
+    }
+    
+    .page-number:hover {
+      background: rgba(159, 216, 26, 0.3);
+      color: #fff;
+    }
+    
+    .page-number.active {
+      background: #9fd81a;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .pagination-size select {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f1f1f1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    
+    .results-info {
+      padding: 10px 0;
+      text-align: right;
+    }
+    
+    /* ===================================================
+       RESPONSIVE
+    =================================================== */
+    
+    @media (max-width: 768px) {
+      .table-scroll-container {
+        height: 50vh;
+      }
+      
+      .scroll-table {
+        min-width: 900px;
+      }
+      
+      .scroll-table th,
+      .scroll-table td {
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        min-width: 80px;
+      }
+      
+      .pagination-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Factura Barba Negra</title>
+
+
+  <style>
+    body {
+      font-family: 'Calibri', 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: #f5f5f5;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    /* Optimización para vista web responsiva */
+    @media screen and (max-width: 768px) {
+      body { 
+        padding: 15px; 
+      }
+      .factura { 
+        padding: 20px; 
+        box-shadow: none;
+      }
+      .datos { 
+        flex-direction: column; 
+      }
+      .datos-derecha { 
+        text-align: left; 
+        margin-top: 15px; 
+      }
+      table { 
+        font-size: 14px; 
+      }
+      th, td { 
+        padding: 8px 4px; 
+      }
+    }
+
+    /* Optimización específica para impresión */
+    @media print {
+      body {
+        background: white !important;
+        padding: 20px !important;
+      }
+      .factura {
+        box-shadow: none !important;
+        margin: 0 !important;
+        max-width: none !important;
+      }
+      .btn-imprimir {
+        display: none !important;
+      }
+    }
+
+    .factura {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo-container {
+      margin-bottom: 15px;
+    }
+
+    .shop-name {
+      margin: 5px 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .shop-location {
+      margin: 5px 0;
+      color: #333;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .shop-branch {
+      margin: 5px 0;
+      color: #333;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .titulo {
+      padding: 10px 20px;
+      border: 1px solid #8B7355;
+      border-radius: 4px;
+      color: #8B7355;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .separator {
+      height: 1px;
+      background-color: #8B7355;
+      margin: 20px 0;
+      opacity: 0.5;
+    }
+
+    .datos {
+      display: flex;
+      justify-content: space-between;
+      margin: 25px 0;
+      font-size: 15px;
+    }
+
+    .datos-izquierda {
+      border-left: 3px solid #8B7355;
+      padding-left: 15px;
+    }
+
+    .datos-derecha {
+      text-align: right;
+    }
+
+    .datos strong {
+      color: #666;
+    }
+
+    .seccion {
+      margin-top: 30px;
+    }
+
+    .seccion-titulo {
+      font-size: 18px;
+      color: #8B7355;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      color: #8B7355;
+      font-weight: normal;
+      text-transform: uppercase;
+      font-size: 14px;
+      border-bottom: 2px solid #8B7355;
+    }
+
+    .precio-col, .cantidad-col, .total-col, 
+    td:nth-child(2), td:nth-child(3), td:nth-child(4) {
+      text-align: center;
+      border-left: 1px solid #e0e0e0;
+    }
+
+    .precio-col, td:nth-child(2) {
+      width: 120px;
+    }
+
+    .cantidad-col, td:nth-child(3) {
+      width: 100px;
+    }
+
+    .total-col, td:nth-child(4) {
+      width: 120px;
+    }
+
+    .servicio-col, .producto-col, td:nth-child(1) {
+      text-align: left;
+    }
+
+    .totales {
+      margin-left: auto;
+      width: 300px;
+    }
+
+    .totales-fila {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .totales-fila:last-child {
+      font-weight: bold;
+      border-top: 2px solid #8B7355;
+      border-bottom: none;
+      margin-top: 5px;
+      padding-top: 12px;
+      color: #8B7355;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #777;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .footer-info {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="factura">
+    <div class="header">
+      <!-- Logo circular -->
+      <div class="logo-container">
+        <img src="{{logo_src}}" alt="Logo Barba Negra"
+             style="height:80px;width:80px;border-radius:50%;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.25)" />
+      </div>
+      
+      <!-- Títulos centrados uno debajo del otro -->
+      <h1 class="shop-name">Barba Negra</h1>
+      <h1 class="shop-location">Paseo General Escalón</h1>
+      <h3 class="shop-branch">Carabela Paseo</h3>
+      
+      <div class="titulo">Factura #{{factura}}</div>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="datos">
+      <div class="datos-izquierda">
+        <div><strong>Fecha:</strong> {{fecha}}</div>
+        <div><strong>Comanda:</strong> {{comanda}}</div>
+        <div><strong>Tipo de pago:</strong> {{tipo_pago}}</div>
+      </div>
+      <div class="datos-derecha">
+        <div><strong>Cliente:</strong> {{cliente}}</div>
+        <div><strong>Empleado:</strong> {{empleado}}</div>
+      </div>
+    </div>
+
+    <div class="seccion">
+      <div class="seccion-titulo">Servicios</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="servicio-col">Servicio</th>
+            <th class="precio-col">Precio Unit.</th>
+            <th class="cantidad-col">Cantidad</th>
+            <th class="total-col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{detalle_cortes}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="seccion">
+      <div class="seccion-titulo">Productos</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="producto-col">Producto</th>
+            <th class="precio-col">Precio Unit.</th>
+            <th class="cantidad-col">Cantidad</th>
+            <th class="total-col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{detalle_productos}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totales">
+      <div class="totales-fila">
+        <div>Subtotal:</div>
+        <div>${{precio_venta}}</div>
+      </div>
+      <div class="totales-fila">
+        <div>Descuento:</div>
+        <div>{{descuento}}</div>
+      </div>
+      <div class="totales-fila">
+        <div>Total a Pagar:</div>
+        <div>${{total}}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>¡Gracias por su preferencia!</div>
+      <div class="footer-info">
+         Paseo General Escalón #4357 Local 1.  Teléfono : 7609 - 8960
+      </div>
+    </div>
+  </div>
+</body>
+</html>

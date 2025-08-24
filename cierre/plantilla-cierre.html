@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cierre de Caja - Barba Negra</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* Botón de imprimir - Solo visible en pantalla */
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+    
+    .print-button:hover {
+      background: #1e40af;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(30, 58, 138, 0.4);
+    }
+    
+    .print-button i {
+      margin-right: 8px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1a202c;
+      line-height: 1.5;
+      font-size: 13px;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* === HEADER === */
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      padding: 25px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .business-info h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .business-info .subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 3px;
+    }
+
+    .business-info .location {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .logo-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .report-title {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .report-title h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .report-date {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    /* === CONTENT === */
+    .content {
+      padding: 30px;
+    }
+
+    /* Info General */
+    .info-section {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #64748b;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* Secciones principales */
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section-header {
+      background: #1e293b;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px 8px 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-content {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 20px;
+    }
+
+    /* === RESUMEN EJECUTIVO === */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .summary-card {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-color, #3b82f6);
+    }
+
+    .summary-card.revenue { --card-color: #10b981; }
+    .summary-card.transactions { --card-color: #3b82f6; }
+    .summary-card.expenses { --card-color: #f59e0b; }
+    .summary-card.profit { --card-color: #8b5cf6; }
+
+    .summary-card .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card-color, #3b82f6);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 18px;
+    }
+
+    .summary-card .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 5px;
+    }
+
+    .summary-card .label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    /* === TABLAS === */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .data-table th {
+      background: #f1f5f9;
+      color: #374151;
+      padding: 12px 8px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e5e7eb;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .data-table .numeric {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .data-table .positive {
+      color: #10b981;
+    }
+
+    .data-table .negative {
+      color: #ef4444;
+    }
+
+    .data-table .neutral {
+      color: #6b7280;
+    }
+
+    /* === TOTALES === */
+    .totals-row {
+      background: #1e293b !important;
+      color: white !important;
+      font-weight: 700;
+    }
+
+    .totals-row td {
+      border-top: 2px solid #3b82f6;
+      padding: 14px 8px;
+      font-size: 13px;
+    }
+
+    /* === ESTADOS === */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-success {
+      background: #dcfce7;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status-warning {
+      background: #fef3c7;
+      color: #d97706;
+      border: 1px solid #fed7aa;
+    }
+
+    .status-error {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* === OBSERVACIONES === */
+    .observations-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .observations-box h4 {
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .observations-content {
+      color: #6b7280;
+      font-style: italic;
+      line-height: 1.6;
+      min-height: 40px;
+    }
+
+    /* === FOOTER === */
+    .footer {
+      background: #f1f5f9;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer-info {
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .footer-timestamp {
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { margin: 0; border-radius: 0; }
+      .header { padding: 20px; }
+      .content { padding: 20px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .info-grid { grid-template-columns: 1fr; }
+      .data-table { font-size: 11px; }
+      .data-table th, .data-table td { padding: 8px 4px; }
+    }
+
+    /* === PRINT STYLES === */
+    @media print {
+      .print-button { display: none; }
+      body { background: white; padding: 0; font-size: 11px; }
+      .container { box-shadow: none; border-radius: 0; }
+      .header { background: #1e3a8a !important; }
+      .section-header { background: #1e293b !important; }
+      .summary-card::before { background: black !important; }
+      .totals-row { background: #333 !important; }
+      .data-table { page-break-inside: avoid; }
+      .section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="business-info">
+          <h1>Barba Negra</h1>
+          <div class="subtitle">Barbería Profesional</div>
+          <div class="location">Paseo General Escalón</div>
+        </div>
+        <div class="logo-container">
+          {{logo_placeholder}}
+        </div>
+      </div>
+      <div class="report-title">
+        <h2>Cierre de Caja</h2>
+        <div class="report-date">{{fecha}}</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Información General -->
+      <div class="info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Fecha</span>
+            <span class="info-value">{{fecha}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Responsable</span>
+            <span class="info-value">{{responsable}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Hora Apertura</span>
+            <span class="info-value">{{hora_apertura}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen Ejecutivo -->
+      <div class="summary-grid">
+        <div class="summary-card revenue">
+          <div class="icon">💰</div>
+          <div class="value">${{ingresos_totales}}</div>
+          <div class="label">Ingresos Totales</div>
+        </div>
+        <div class="summary-card transactions">
+          <div class="icon">📊</div>
+          <div class="value">{{total_transacciones}}</div>
+          <div class="label">Transacciones</div>
+        </div>
+        <div class="summary-card expenses">
+          <div class="icon">💸</div>
+          <div class="value">${{total_gastos}}</div>
+          <div class="label">Gastos</div>
+        </div>
+        <div class="summary-card profit">
+          <div class="icon">📈</div>
+          <div class="value">${{utilidad_neta}}</div>
+          <div class="label">Utilidad Neta</div>
+        </div>
+      </div>
+
+      <!-- Ventas por Tipo de Pago -->
+      <div class="section">
+        <div class="section-header">
+          <span>💳</span> Ventas por Tipo de Pago
+        </div>
+        <div class="section-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Factura</th>
+                <th>Comanda</th>
+                <th>Cliente</th>
+                <th>Empleado</th>
+                <th>Tipo Pago</th>
+                <th class="numeric">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{tabla_ventas}}
+              <tr class="totals-row">
+                <td colspan="5"><strong>TOTAL VENTAS</strong></td>
+                <td class="numeric"><strong>${{total_ventas}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Servicios Realizados -->
+      <div class="section">
+        <div class="section-header">
+          <span>✂️</span> Servicios Realizados
+        </div>
+        <div class="section-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Cliente</th>
+                <th>Empleado</th>
+                <th class="numeric">Precio</th>
+                <th class="numeric">Cantidad</th>
+                <th class="numeric">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{tabla_servicios}}
+              <tr class="totals-row">
+                <td colspan="5"><strong>TOTAL SERVICIOS</strong></td>
+                <td class="numeric"><strong>${{total_servicios}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Productos Vendidos -->
+      <div class="section">
+        <div class="section-header">
+          <span>🛍️</span> Productos Vendidos
+        </div>
+        <div class="section-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cliente</th>
+                <th>Empleado</th>
+                <th class="numeric">Precio Unit.</th>
+                <th class="numeric">Cantidad</th>
+                <th class="numeric">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{tabla_productos}}
+              <tr class="totals-row">
+                <td colspan="5"><strong>TOTAL PRODUCTOS</strong></td>
+                <td class="numeric"><strong>${{total_productos}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Comisiones -->
+      <div class="section">
+        <div class="section-header">
+          <span>💼</span> Comisiones del Día
+        </div>
+        <div class="section-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th class="numeric">Servicios</th>
+                <th class="numeric">Ventas</th>
+                <th class="numeric">Comisión</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{tabla_comisiones}}
+              <tr class="totals-row">
+                <td><strong>TOTAL COMISIONES</strong></td>
+                <td class="numeric"><strong>{{total_servicios_empleados}}</strong></td>
+                <td class="numeric"><strong>${{total_ventas_empleados}}</strong></td>
+                <td class="numeric"><strong>${{total_comisiones}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gastos -->
+      <div class="section">
+        <div class="section-header">
+          <span>💸</span> Gastos del Día
+        </div>
+        <div class="section-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Responsable</th>
+                <th class="numeric">Monto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{tabla_gastos}}
+              <tr class="totals-row">
+                <td colspan="4"><strong>TOTAL GASTOS</strong></td>
+                <td class="numeric"><strong>${{total_gastos}}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Rangos de Comandas y Facturas -->
+      <div class="section">
+        <div class="section-header">
+          <span>📋</span> Control de Numeración
+        </div>
+        <div class="section-content">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Comandas</span>
+              <span class="info-value">{{rango_comandas}}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Facturas</span>
+              <span class="info-value">{{rango_facturas}}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Estado Caja</span>
+              <span class="info-value">{{estado_cierre}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="observations-box">
+        <h4>Observaciones</h4>
+        <div class="observations-content">
+          {{observaciones}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-info">Paseo General Escalón #4357 Local 1 • Tel: 7609-8960</div>
+      <div class="footer-timestamp">Generado el {{timestamp}}</div>
+    </div>
+  </div>
+
+  <!-- Botón de Imprimir -->
+  <button class="print-button" onclick="imprimirCierre()">
+    <i class="fas fa-print"></i>
+    Imprimir PDF
+  </button>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    function imprimirCierre() {
+      console.log('🖨️ Imprimiendo cierre de caja...');
+      window.print();
+    }
+    
+    console.log('✅ Vista HTML de cierre de caja cargada correctamente');
+  </script>
+</body>
+</html>

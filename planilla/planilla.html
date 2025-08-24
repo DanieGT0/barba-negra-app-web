@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planilla de Salarios</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+</head>
+<body>
+
+  <h1>Planilla de Salarios</h1>
+  <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+    <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+      <i class="fas fa-arrow-left"></i> Centro de Reportes
+    </button>
+  </div>
+  <div class="acciones">
+    <button id="exportarExcel">Exportar Excel</button>
+  </div>
+
+  <table id="tablaPlanilla">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>DUI</th>
+        <th>Nombre</th>
+        <th>Salario Base</th>
+        <th>Cta Cortes</th>
+        <th>Com Cortes</th>
+        <th>Cta Productos</th>
+        <th>Com Productos</th>
+        <th>Total a Pagar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Datos se llenan dinámicamente -->
+    </tbody>
+  </table>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarPlanilla();
+      document.getElementById('exportarExcel').addEventListener('click', exportarExcel);
+    });
+
+    async function fetchData(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        return await res.json();
+      } catch (error) {
+        console.error('Error obteniendo datos:', error);
+        return [];
+      }
+    }
+
+    async function cargarPlanilla() {
+      const empleados = await fetchData('/api/empleados');
+      const detalleCortes = await fetchData('/api/detalle_cortes');
+      const detalleProductos = await fetchData('/api/detalle_productos');
+
+      const tbody = document.querySelector("#tablaPlanilla tbody");
+      tbody.innerHTML = "";
+
+      empleados.forEach(empleado => {
+        // --- Calcular cortes ---
+        const cortesEmpleado = detalleCortes.filter(c => c.empleado === empleado.nombre);
+        const cantidadCortes = cortesEmpleado.reduce((total, corte) => total + (corte.cantidad || 0), 0);
+        const comisionCortes = cortesEmpleado.reduce((total, corte) => total + (corte.comision || 0), 0);
+
+        // --- Calcular productos ---
+        const productosEmpleado = detalleProductos.filter(p => p.empleado === empleado.nombre);
+        const cantidadProductos = productosEmpleado.reduce((total, producto) => total + (producto.cantidad || 0), 0);
+        const comisionProductos = productosEmpleado.reduce((total, producto) => total + (producto.comision || 0), 0);
+
+        // --- Calcular total a pagar ---
+        const salarioBase = parseFloat(empleado.salario) || 0;
+        const totalPagar = salarioBase + comisionCortes + comisionProductos;
+
+        // --- Mostrar en la tabla ---
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${empleado.fecha}</td>
+          <td>${empleado.dui}</td>
+          <td>${empleado.nombre}</td>
+          <td>$${salarioBase.toFixed(2)}</td>
+          <td>${cantidadCortes}</td>
+          <td>$${comisionCortes.toFixed(2)}</td>
+          <td>${cantidadProductos}</td>
+          <td>$${comisionProductos.toFixed(2)}</td>
+          <td><strong>$${totalPagar.toFixed(2)}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportarExcel() {
+      const tabla = document.getElementById('tablaPlanilla');
+      const wb = XLSX.utils.table_to_book(tabla);
+      XLSX.writeFile(wb, 'planilla_salarios.xlsx');
+    }
+  </script>
+
+</body>
+</html>

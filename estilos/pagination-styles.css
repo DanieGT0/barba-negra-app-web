@@ -1,0 +1,444 @@
+/* ===================================================
+   PAGINATION-STYLES.CSS
+   Archivo complementario para paginación y scroll
+   Vincula este archivo en tus HTML existentes
+   =================================================== */
+
+/* ===== MEJORAS DE SCROLL PARA TABLAS EXISTENTES ===== */
+
+/* Mejorar el scroll de todas las tablas */
+.table-responsive {
+  /* Altura máxima para activar scroll vertical */
+  max-height: 600px;
+  /* Scroll personalizado para navegadores modernos */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 230, 207, 0.6) rgba(0, 0, 0, 0.1);
+  /* Transición suave */
+  transition: all 0.3s ease;
+}
+
+/* Scroll personalizado para WebKit (Chrome, Safari, Edge) */
+.table-responsive::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #a8e6cf, #81d8d0);
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #78c2ad, #6bb6b0);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.table-responsive::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ===== ESTILOS PARA CONTENEDOR DE PAGINACIÓN ===== */
+
+/* Contenedor principal de paginación */
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Información de registros */
+.pagination-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.pagination-info .records-count {
+  background: rgba(168, 230, 207, 0.1);
+  color: #a8e6cf;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  border: 1px solid rgba(168, 230, 207, 0.3);
+  font-weight: 600;
+}
+
+/* Selector de registros por página */
+.records-per-page {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.records-per-page label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin: 0;
+}
+
+.records-per-page select {
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem;
+  width: auto;
+  min-width: 80px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.records-per-page select:focus {
+  border-color: #a8e6cf;
+  box-shadow: 0 0 8px rgba(168, 230, 207, 0.4);
+  outline: none;
+}
+
+.records-per-page select option {
+  background-color: rgba(26, 26, 46, 0.95);
+  color: white;
+}
+
+/* Controles de paginación */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Botones de paginación */
+.pagination-btn {
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-weight: 500;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+/* Efecto hover para botones */
+.pagination-btn:hover:not(.disabled) {
+  background: rgba(168, 230, 207, 0.2);
+  border-color: rgba(168, 230, 207, 0.5);
+  color: #a8e6cf;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(168, 230, 207, 0.3);
+}
+
+/* Botón activo/actual */
+.pagination-btn.active {
+  background: linear-gradient(45deg, #a8e6cf, #81d8d0);
+  color: rgba(0, 0, 0, 0.8);
+  border-color: #78c2ad;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(168, 230, 207, 0.6);
+  transform: scale(1.05);
+}
+
+.pagination-btn.active:hover {
+  transform: scale(1.05) translateY(-2px);
+}
+
+/* Botones deshabilitados */
+.pagination-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pagination-btn.disabled:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Botones de primera/última página */
+.pagination-btn.first,
+.pagination-btn.last {
+  font-weight: 600;
+  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(52, 152, 219, 0.5);
+  color: #3498db;
+}
+
+.pagination-btn.first:hover:not(.disabled),
+.pagination-btn.last:hover:not(.disabled) {
+  background: rgba(52, 152, 219, 0.4);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+/* Separador de puntos suspensivos */
+.pagination-ellipsis {
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.6rem;
+  user-select: none;
+  font-weight: bold;
+}
+
+/* Input para ir a página específica */
+.pagination-jump {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.pagination-jump input {
+  width: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.4rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.pagination-jump input:focus {
+  border-color: #a8e6cf;
+  box-shadow: 0 0 6px rgba(168, 230, 207, 0.4);
+  outline: none;
+}
+
+.pagination-jump .jump-btn {
+  background: rgba(168, 230, 207, 0.2);
+  color: #a8e6cf;
+  border: 1px solid rgba(168, 230, 207, 0.4);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-jump .jump-btn:hover {
+  background: rgba(168, 230, 207, 0.3);
+  box-shadow: 0 2px 8px rgba(168, 230, 207, 0.3);
+}
+
+/* ===== INDICADORES Y MENSAJES ===== */
+
+/* Indicador de carga */
+.table-loading {
+  position: relative;
+}
+
+.table-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 16px;
+}
+
+.table-loading::before {
+  content: 'Cargando...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 600;
+  z-index: 11;
+  background: rgba(168, 230, 207, 0.1);
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  border: 1px solid rgba(168, 230, 207, 0.3);
+}
+
+/* Mensaje cuando no hay datos */
+.table-no-data {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.table-no-data i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Efecto de resaltado para filas filtradas */
+.table-row-highlight {
+  background-color: rgba(168, 230, 207, 0.1) !important;
+  border-left: 3px solid #a8e6cf;
+}
+
+.table-row-highlight:hover {
+  background-color: rgba(168, 230, 207, 0.15) !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+  .pagination-container {
+    padding: 1rem;
+  }
+  
+  .pagination-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .pagination-controls {
+    gap: 0.25rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    min-width: 35px;
+  }
+  
+  .pagination-jump {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .records-per-page {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  /* Ocultar algunos botones en móvil */
+  .pagination-btn.mobile-hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    min-width: 30px;
+  }
+  
+  .pagination-ellipsis {
+    padding: 0.4rem;
+  }
+  
+  /* Mostrar solo página anterior, actual, siguiente en móvil */
+  .pagination-controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+  }
+}
+
+/* ===== ANIMACIONES ===== */
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pagination-btn.active {
+  animation: pulse 2s infinite;
+}
+
+/* ===== MEJORAS ADICIONALES ===== */
+
+/* Mejorar el comportamiento de las tablas existentes */
+table {
+  font-size: 0.85rem; /* Hacer el texto un poco más pequeño para mostrar más datos */
+}
+
+/* Hacer las celdas más compactas */
+th, td {
+  padding: 0.75rem 0.5rem;
+}
+
+/* Mejorar la legibilidad en las tablas */
+tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: background-color 0.3s ease;
+}
+
+/* ===== CLASES AUXILIARES ===== */
+
+/* Para ocultar elementos en diferentes tamaños de pantalla */
+.hide-mobile {
+  display: block;
+}
+
+.hide-desktop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+  
+  .hide-desktop {
+    display: block;
+  }
+}
+
+/* Para centrar contenido */
+.text-center {
+  text-align: center;
+}
+
+/* Para botones que ocupen todo el ancho */
+.btn-full-width {
+  width: 100%;
+}
+
+/* Para espaciado consistente */
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }

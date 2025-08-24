@@ -1,0 +1,428 @@
+<!-- /gastos/gastos.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulo de Gastos e Inventarios</title>
+  <link rel="stylesheet" href="/estilos/stylesall.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Estilos adicionales para inventarios -->
+  <style>
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .badge-inventory {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .badge-expense {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .btn-out {
+      background-color: #fd7e14;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 2px;
+    }
+    
+    .btn-out:hover {
+      background-color: #e8650e;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    small {
+      color: #666;
+      font-size: 0.85em;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    
+    .mt-4 {
+      margin-top: 2rem;
+    }
+    
+    .mb-4 {
+      margin-bottom: 2rem;
+    }
+    
+    /* Estilos para botones deshabilitados */
+    .btn-primary:disabled,
+    .btn-secondary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #6c757d !important;
+    }
+    
+    .btn-primary:disabled:hover {
+      background-color: #6c757d !important;
+    }
+    
+    /* Estilos para paginación */
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .btn-pagination {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-pagination:hover:not(:disabled) {
+      background: #0056b3;
+    }
+    
+    .btn-pagination:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .pagination-info {
+      color: #ccc;
+      font-size: 0.9em;
+    }
+    
+    .pagination-size {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ccc;
+      font-size: 0.9em;
+    }
+    
+    .pagination-size select {
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 4px 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .pagination-controls {
+        order: 2;
+      }
+      
+      .pagination-info {
+        order: 1;
+      }
+      
+      .pagination-size {
+        order: 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="toggle-form-container">
+      <button id="toggleFormBtn" class="btn-toggle">
+        <span>Mostrar/Ocultar Formulario</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+    <div class="toggle-form-container" style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="location.href='/indexreportes.html'" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> Centro de Reportes
+      </button>
+    </div>
+    <div id="formSection" class="card glass hidden">
+      <h1>Registro de Gastos</h1>
+      <form id="gastoForm">
+        <input type="hidden" id="accion" name="accion" value="crear">
+        <input type="hidden" id="gasto_id" name="gasto_id" value="">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+
+          <div class="form-group">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" name="categoria" required>
+              <option value="Servicios Públicos">Servicios Públicos (Luz, Agua, Teléfono)</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+              <option value="Alquiler">Alquiler/Renta</option>
+              <option value="Gastos Varios">Gastos Varios</option>
+              <option value="Insumos Barbería">Insumos Barbería (Inventario)</option>
+              <option value="Productos Venta">Productos de Venta (Inventario)</option>
+              <option value="Materiales">Materiales (Inventario)</option>
+              <option value="Otros Inventarios">Otros Inventarios</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="descripcion">Descripción</label>
+            <input type="text" id="descripcion" name="descripcion" required placeholder="Ej: Gelatinas, Shampoo, Pago de energía, etc." />
+          </div>
+
+          <div class="form-group">
+            <label for="es_inventario">
+              <input type="checkbox" id="es_inventario" name="es_inventario" />
+              ¿Es un inventario?
+            </label>
+            <small>Marcar si es un producto que se puede inventariar y tener salidas</small>
+          </div>
+
+          <!-- Campos para gastos normales -->
+          <div id="campos-gasto" class="form-group">
+            <label for="monto">Monto Total ($)</label>
+            <input type="number" step="0.01" id="monto" name="monto" />
+          </div>
+
+          <!-- Campos para inventarios -->
+          <div id="campos-inventario" class="hidden" style="display: none;">
+            <div class="form-group">
+              <label for="cantidad">Cantidad</label>
+              <input type="number" id="cantidad" name="cantidad" min="1" placeholder="Ej: 10" />
+            </div>
+
+            <div class="form-group">
+              <label for="precio_unitario">Precio Unitario ($)</label>
+              <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" min="0" placeholder="Ej: 5.50" />
+            </div>
+
+            <div class="form-group">
+              <label for="total_calculado">Total Calculado ($)</label>
+              <input type="number" step="0.01" id="total_calculado" name="total_calculado" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="buttons-container">
+          <button type="submit" id="submitBtn" class="btn-primary">Guardar Gasto</button>
+          <button type="button" id="cancelBtn" class="btn-secondary" style="display: none;">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card glass mt-4">
+      <h2>Listado de Gastos</h2>
+      <div class="search-container">
+        <input type="text" id="searchCategoria" placeholder="Buscar categoría">
+        <input type="date" id="fechaDesde">
+        <input type="date" id="fechaHasta">
+        <button id="searchBtn" class="btn-search"><i class="fas fa-search"></i></button>
+        <button id="clearFiltersBtn" class="btn-search"><i class="fas fa-times"></i></button>
+        <button id="downloadExcelBtn" class="btn-search">
+          <i class="fas fa-file-excel"></i> Descargar Excel
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table id="gastosTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>P. Unit</th>
+              <th>Monto</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Paginación para tabla de gastos -->
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span id="gastosInfo">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button id="gastosPrevBtn" class="btn-pagination" disabled>
+            <i class="fas fa-chevron-left"></i> Anterior
+          </button>
+          <span id="gastosPaginaActual">Página 1 de 1</span>
+          <button id="gastosNextBtn" class="btn-pagination" disabled>
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="pagination-size">
+          <label for="gastosPorPagina">Registros por página:</label>
+          <select id="gastosPorPagina">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Salidas de Inventario -->
+    <div class="card glass mt-4" id="seccion-salidas" style="display: none;">
+      <h2>Salidas de Inventario</h2>
+      
+      <!-- Formulario de Salida -->
+      <form id="salidaForm" class="mb-4">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="producto_salida">Producto</label>
+            <select id="producto_salida" name="producto_salida" required>
+              <option value="">Seleccionar producto...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="empleado_salida">Empleado Responsable</label>
+            <select id="empleado_salida" name="empleado_salida" required>
+              <option value="">Seleccionar empleado...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cantidad_salida">Cantidad a Salir</label>
+            <input type="number" id="cantidad_salida" name="cantidad_salida" min="1" required />
+            <small id="stock_disponible"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="valor_calculado_salida">Valor Total ($)</label>
+            <input type="number" step="0.01" id="valor_calculado_salida" readonly />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="observaciones_salida">Observaciones</label>
+            <textarea id="observaciones_salida" name="observaciones_salida" rows="2" placeholder="Observaciones opcionales"></textarea>
+          </div>
+        </div>
+
+        <div class="buttons-container">
+          <button type="submit" class="btn-primary">Registrar Salida</button>
+          <button type="button" id="cancelSalidaBtn" class="btn-secondary">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Sección de Historial de Salidas -->
+    <div class="card glass mt-4">
+      <h2>Historial de Salidas de Inventario</h2>
+      
+      <div class="search-container">
+        <input type="text" id="searchEmpleado" placeholder="Buscar empleado">
+        <input type="date" id="fechaDesdeSalidas">
+        <input type="date" id="fechaHastaSalidas">
+        <button id="searchSalidasBtn" class="btn-search"><i class="fas fa-search"></i></button>
+        <button id="clearSalidasBtn" class="btn-search"><i class="fas fa-times"></i></button>
+        <button id="downloadSalidasExcelBtn" class="btn-search">
+          <i class="fas fa-file-excel"></i> Excel Salidas
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table id="salidasTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Empleado</th>
+              <th>Cantidad</th>
+              <th>P. Unit</th>
+              <th>Valor Total</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Paginación para tabla de salidas -->
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span id="salidasInfo">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button id="salidasPrevBtn" class="btn-pagination" disabled>
+            <i class="fas fa-chevron-left"></i> Anterior
+          </button>
+          <span id="salidasPaginaActual">Página 1 de 1</span>
+          <button id="salidasNextBtn" class="btn-pagination" disabled>
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="pagination-size">
+          <label for="salidasPorPagina">Registros por página:</label>
+          <select id="salidasPorPagina">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de control -->
+    <div class="toggle-form-container mt-4">
+      <button id="toggleSalidasBtn" class="btn-secondary">
+        <i class="fas fa-boxes"></i> Mostrar/Ocultar Salidas de Inventario
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="gastos.js"></script>
+</body>
+</html>
