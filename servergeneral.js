@@ -2761,8 +2761,7 @@ app.get('/api/detalle_cortes', async (req, res) => {
       FROM detalle_cortes 
       ORDER BY 
         fecha DESC,
-        COALESCE(factura::INTEGER, 0) DESC,
-        COALESCE(comanda::INTEGER, 0) DESC
+        id DESC
     `;
     
     console.log('📊 Ejecutando consulta con ordenamiento: fecha DESC, factura DESC, comanda DESC');
@@ -2810,8 +2809,7 @@ app.get('/api/detalle_productos', async (req, res) => {
     FROM detalle_productos 
     ORDER BY 
       fecha DESC,
-      COALESCE(factura::INTEGER, 0) DESC,
-      COALESCE(comanda::INTEGER, 0) DESC
+      id DESC
   `;
   
   console.log('📊 Ejecutando consulta con ordenamiento: fecha DESC, factura DESC, comanda DESC');
@@ -8197,95 +8195,7 @@ app.get('/', (req, res) => {
     });
   });
 
-  // Endpoint para crear nueva factura (POST /facturas)
-  app.post('/facturas', async (req, res) => {
-    try {
-      const {
-        fecha, comanda, factura, cliente, empleado, tipo_pago, descuento, total,
-        detalleCortes, detalleProductos,
-        es_pago_mixto, monto_efectivo, monto_tarjeta
-      } = req.body;
-
-      // Iniciar transacción
-      db.serialize(() => {
-        db.run("BEGIN TRANSACTION");
-
-        // Insertar factura
-        const insertFactura = `
-          INSERT INTO facturas 
-          (fecha, comanda, factura, cliente, empleado, tipo_pago, precio_venta, descuento, total, empleado_principal, es_pago_mixto, monto_efectivo, monto_tarjeta)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        db.run(insertFactura, [
-          fecha, comanda, factura, cliente, empleado, tipo_pago, total, descuento, total, empleado,
-          es_pago_mixto ? 1 : 0, monto_efectivo || 0, monto_tarjeta || 0
-        ], function(err) {
-          if (err) {
-            db.run("ROLLBACK");
-            console.error('Error al insertar factura:', err);
-            return res.status(500).json({ mensaje: 'Error al crear factura' });
-          }
-
-          const facturaId = this.lastID;
-
-          // Insertar detalles de cortes
-          if (detalleCortes && detalleCortes.length > 0) {
-            const insertCorte = `
-              INSERT INTO detalle_cortes 
-              (factura_id, codigo, nombre, cantidad, total, comision, empleado, fecha, comanda, factura)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-
-            detalleCortes.forEach(corte => {
-              if (corte && corte.cantidad > 0) {
-                db.run(insertCorte, [
-                  facturaId, corte.codigo, corte.nombre, corte.cantidad, corte.total, corte.comision,
-                  corte.empleado, fecha, comanda, factura
-                ], (err) => {
-                  if (err) console.error('Error al insertar detalle de corte:', err);
-                });
-              }
-            });
-          }
-
-          // Insertar detalles de productos
-          if (detalleProductos && detalleProductos.length > 0) {
-            const insertProducto = `
-              INSERT INTO detalle_productos 
-              (factura_id, codigo, nombre, cantidad, total, comision, empleado, fecha, comanda, factura)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-
-            detalleProductos.forEach(producto => {
-              if (producto && producto.cantidad > 0) {
-                db.run(insertProducto, [
-                  facturaId, producto.codigo, producto.nombre, producto.cantidad, producto.total, 
-                  producto.comision, producto.empleado, fecha, comanda, factura
-                ], (err) => {
-                  if (err) console.error('Error al insertar detalle de producto:', err);
-                });
-
-                // Actualizar inventario de productos
-                db.run("UPDATE productos SET existencia = existencia - ? WHERE codigo = ?", [
-                  producto.cantidad, producto.codigo
-                ], (err) => {
-                  if (err) console.error('Error al actualizar inventario:', err);
-                });
-              }
-            });
-          }
-
-          db.run("COMMIT");
-          res.json({ mensaje: 'Factura creada exitosamente', id: facturaId });
-        });
-      });
-
-    } catch (error) {
-      console.error('Error en POST /facturas:', error);
-      res.status(500).json({ mensaje: 'Error interno del servidor' });
-    }
-  });
+  // Endpoint SQLite POST /facturas eliminado - se usa el PostgreSQL de línea 1896
 
   // Endpoint para eliminar factura (DELETE /facturas/:id)
   app.delete('/facturas/:id', (req, res) => {
