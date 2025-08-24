@@ -1309,11 +1309,15 @@ function renderizarTablaFacturas(facturas) {
     // Construir información del tipo de pago
     let tipoPagoTexto = f.tipo_pago;
     if (f.es_pago_mixto) {
+      // Convertir a número para evitar error toFixed
+      const montoEfectivo = parseFloat(f.monto_efectivo || 0);
+      const montoTarjeta = parseFloat(f.monto_tarjeta || 0);
+      
       tipoPagoTexto = `
         <div style="font-size: 0.8em;">
           <div style="color: #28a745; font-weight: bold;">🔄 Pago Mixto</div>
-          <div style="color: #666;">💵 Efectivo: $${(f.monto_efectivo || 0).toFixed(2)}</div>
-          <div style="color: #666;">💳 Tarjeta: $${(f.monto_tarjeta || 0).toFixed(2)}</div>
+          <div style="color: #666;">💵 Efectivo: $${montoEfectivo.toFixed(2)}</div>
+          <div style="color: #666;">💳 Tarjeta: $${montoTarjeta.toFixed(2)}</div>
         </div>
       `;
     }
