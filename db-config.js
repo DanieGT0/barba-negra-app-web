@@ -56,10 +56,26 @@ async function createTables(client) {
         usuario VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         rol VARCHAR(50) DEFAULT 'Usuario',
+        modulos TEXT,
         fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         activo BOOLEAN DEFAULT true
       );
     `);
+
+    // Agregar columna modulos si no existe (para bases de datos existentes)
+    try {
+      await client.query(`
+        DO $$ BEGIN
+          BEGIN
+            ALTER TABLE usuarios ADD COLUMN modulos TEXT;
+          EXCEPTION
+            WHEN duplicate_column THEN NULL;
+          END;
+        END $$;
+      `);
+    } catch (e) {
+      console.log('Migración de usuarios completada (columna modulos puede haber existido ya)');
+    }
 
     // Tabla de clientes
     await client.query(`
